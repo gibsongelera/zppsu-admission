@@ -1,0 +1,916 @@
+2025-08-09 23:42:19 POST: Array
+(
+    [id] => 
+    [section_name] => q
+    [qty] => 12
+    [opnl] => 12
+    [non_opnl] => 12
+    [total] => 24
+    [table] => inventory_sales
+)
+
+2025-08-09 23:42:19 POST: Array
+(
+    [id] => 
+    [section_name] => q
+    [qty] => 12
+    [opnl] => 12
+    [non_opnl] => 12
+    [total] => 24
+    [table] => inventory_sales
+)
+
+2025-08-10 02:28:16 POST: Array
+(
+    [id] => 
+    [section_name] => sd
+    [qty] => 12
+    [opnl] => 232
+    [non_opnl] => 232
+    [total] => 464
+    [table] => inventory_sales
+)
+
+2025-08-10 02:28:16 POST: Array
+(
+    [id] => 
+    [section_name] => sd
+    [qty] => 12
+    [opnl] => 232
+    [non_opnl] => 232
+    [total] => 464
+    [table] => inventory_sales
+)
+
+2025-08-10 02:31:49 POST: Array
+(
+    [id] => 
+    [section_name] => sd
+    [qty] => 12
+    [opnl] => 232
+    [non_opnl] => 232
+    [total] => 464
+    [table] => inventory_sales
+)
+
+2025-08-10 02:31:49 POST: Array
+(
+    [id] => 
+    [section_name] => sd
+    [qty] => 12
+    [opnl] => 232
+    [non_opnl] => 232
+    [total] => 464
+    [table] => inventory_sales
+)
+
+2025-08-10 02:42:04 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:42:04 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:42:23 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:42:23 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:44:49 POST: Array
+(
+    [id] => 
+    [section_name] => Back Order
+    [table_name] => inventory_back_order
+    [qty] => 
+    [opnl] => 
+    [non_opnl] => 
+    [total] => 
+    [table] => inventory_sales
+)
+
+2025-08-10 02:44:49 POST: Array
+(
+    [id] => 
+    [section_name] => Back Order
+    [table_name] => inventory_back_order
+    [qty] => 
+    [opnl] => 
+    [non_opnl] => 
+    [total] => 
+    [table] => inventory_back_order
+)
+
+2025-08-10 02:46:12 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:46:12 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:46:18 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:46:18 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:47:22 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:47:22 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:47:34 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:47:34 POST: Array
+(
+    [id] => 
+    [section_name] => inventory_back_order
+    [qty] => -1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => -1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:51:19 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 1
+    [opnl] => 1
+    [non_opnl] => 1
+    [total] => 2
+    [table] => inventory_sales
+)
+
+2025-08-10 02:54:37 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => inventory_harris_radio
+    [qty] => 1
+    [opnl] => 1
+    [non_opnl] => 0
+    [total] => 1
+    [table] => inventory_sales
+)
+
+2025-08-10 02:55:59 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 21
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => 21
+    [table] => inventory_sales
+)
+
+2025-08-10 02:56:13 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.2  FIXED COMMUNICATION
+    [qty] => 12
+    [opnl] => 
+    [non_opnl] => 
+    [total] => 
+    [table] => inventory_sales
+)
+
+2025-08-10 02:58:39 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 21
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => 21
+    [table] => inventory_sales
+)
+
+2025-08-10 03:02:35 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 21
+    [opnl] => 2
+    [non_opnl] => 2
+    [total] => 4
+    [table] => inventory_sales
+)
+
+2025-08-10 03:03:13 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 21
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => 21
+    [table] => inventory_sales
+)
+
+2025-08-10 03:04:52 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 21
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => 21
+    [table] => inventory_sales
+)
+
+2025-08-10 03:06:13 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 21
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => 21
+    [table] => inventory_sales
+)
+
+2025-08-10 03:08:51 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 21
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => 21
+    [table] => inventory_sales
+)
+
+2025-08-10 03:09:10 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 21
+    [opnl] => 23
+    [non_opnl] => 23
+    [total] => 46
+    [table] => inventory_sales
+)
+
+2025-08-10 03:09:21 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.2  FIXED COMMUNICATION
+    [qty] => 23
+    [opnl] => 23
+    [non_opnl] => 23
+    [total] => 46
+    [table] => inventory_sales
+)
+
+2025-08-10 03:12:15 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_receiving
+)
+
+2025-08-10 03:12:18 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => CEIS SEM
+    [table] => inventory_receiving
+)
+
+2025-08-10 03:12:49 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => CEIS SEM
+    [table] => inventory_receiving
+)
+
+2025-08-10 03:12:58 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => CEIS SEM
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:12:59 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => CEIS SEM
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:13:08 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => CEIS SEM
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:13:15 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => CEIS SEM
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:19:23 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:19:25 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:23:54 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:23:55 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:23:57 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => CEIS SEM
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:25:14 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:25:15 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:28:46 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:28:47 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:29:48 POST: Array
+(
+    [id] => 
+    [qty] => 1
+    [equipment] => 1
+    [model] => 4
+    [serial_number] => 44
+    [status] => 1
+    [remarks] => 1
+    [operator] => 4
+    [ceis_rating] => None
+    [table] => inventory_fixed_communication
+)
+
+2025-08-10 03:31:54 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_harris_radio
+)
+
+2025-08-10 03:31:55 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_harris_radio
+)
+
+2025-08-10 03:32:05 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_harris_radio
+)
+
+2025-08-10 03:32:06 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_harris_radio
+)
+
+2025-08-10 03:33:03 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_harris_radio
+)
+
+2025-08-10 03:33:43 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_harris_radio
+)
+
+2025-08-10 03:34:02 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_back_order
+)
+
+2025-08-10 03:35:51 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_back_order
+)
+
+2025-08-10 03:35:52 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_back_order
+)
+
+2025-08-10 03:36:00 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 23
+    [model] => 2
+    [serial_number] => 323
+    [status] => 232
+    [remarks] => 232
+    [operator] => 2332
+    [ceis_rating] => None
+    [table] => inventory_electronics
+)
+
+2025-08-10 03:37:46 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 1
+    [model] => 23
+    [serial_number] => 23
+    [status] => 232
+    [remarks] => 23
+    [operator] => 23
+    [ceis_rating] => 232
+    [table] => inventory_information_systems
+)
+
+2025-08-10 03:39:03 POST: Array
+(
+    [id] => 
+    [qty] => 232
+    [equipment] => 1
+    [model] => 23
+    [serial_number] => 23
+    [status] => 232
+    [remarks] => 23
+    [operator] => 23
+    [ceis_rating] => 232
+    [table] => inventory_firearms
+)
+
+2025-08-10 03:39:16 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.2  FIXED COMMUNICATION
+    [qty] => 1
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => 1
+    [table] => inventory_sales
+)
+
+2025-08-10 03:39:25 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => B.  ELECTRONIC SET
+    [qty] => 213
+    [opnl] => 23
+    [non_opnl] => 23
+    [total] => 46
+    [table] => inventory_sales
+)
+
+2025-08-10 03:44:13 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.1  HARRIS RADIO
+    [qty] => 253
+    [opnl] => 0
+    [non_opnl] => 0
+    [total] => 253
+    [table] => inventory_sales
+)
+
+2025-08-10 04:14:26 POST: Array
+(
+    [id] => 
+    [equipment] => Default Equipment
+    [model] => N/A
+    [serial_number] => N/A
+    [status] => N/A
+    [remarks] => N/A
+    [operator] => N/A
+    [ceis_rating] => N/A
+    [section_name] => A.2  FIXED COMMUNICATION
+    [qty] => 1
+    [opnl] => 343
+    [non_opnl] => 45
+    [total] => 388
+    [table] => inventory_sales
+)
+
