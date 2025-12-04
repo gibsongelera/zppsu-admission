@@ -31,7 +31,7 @@ class DatabaseWrapper {
         
         try {
             if ($type === 'pgsql') {
-                // For Supabase on cloud, force IPv4 resolution to avoid IPv6 issues
+                // For Supabase on cloud, try multiple connection strategies
                 $isCloud = getenv('RENDER') || getenv('DB_HOST');
                 
                 // Force IPv4 resolution - multiple methods for reliability
@@ -42,26 +42,36 @@ class DatabaseWrapper {
                     $ipv4 = $this->resolveIPv4Alternative($host);
                 }
                 
-                // Use IPv4 if available, otherwise use hostname (will try IPv4 first)
-                $connectHost = $ipv4 ? $ipv4 : $host;
-                
-                // Build DSN - always use IPv4 if available
-                $dsn = "pgsql:host={$connectHost};port={$port};dbname={$db}";
-                
-                // Connection attempts with fallback
+                // Build connection attempts: try different ports and hosts
                 $lastError = null;
                 $connected = false;
                 
-                // Build list of hosts to try
-                $attempts = [];
-                if ($ipv4) {
-                    $attempts[] = $ipv4; // Try IPv4 first
+                // Try both ports: 5432 (direct) and 6543 (pooler)
+                // Direct connection (5432) sometimes works better with IPv4
+                $portsToTry = [];
+                if ($port == '6543') {
+                    // If pooler was requested, try direct first, then pooler
+                    $portsToTry = ['5432', '6543'];
+                } else {
+                    // If direct was requested, try it first, then pooler as fallback
+                    $portsToTry = ['5432', '6543'];
                 }
-                $attempts[] = $host; // Always try hostname as fallback
                 
-                foreach ($attempts as $attemptHost) {
+                // Build list of connection attempts
+                $attempts = [];
+                foreach ($portsToTry as $tryPort) {
+                    // Try IPv4 address first if available
+                    if ($ipv4) {
+                        $attempts[] = ['host' => $ipv4, 'port' => $tryPort];
+                    }
+                    // Always try hostname as fallback
+                    $attempts[] = ['host' => $host, 'port' => $tryPort];
+                }
+                
+                // Try each connection combination
+                foreach ($attempts as $attempt) {
                     try {
-                        $dsn = "pgsql:host={$attemptHost};port={$port};dbname={$db}";
+                        $dsn = "pgsql:host={$attempt['host']};port={$attempt['port']};dbname={$db};sslmode=require";
                         $this->pdo = new PDO($dsn, $user, $pass, [
                             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -75,6 +85,26 @@ class DatabaseWrapper {
                         $lastError = $e;
                         // Continue to next attempt
                         continue;
+                    }
+                }
+                
+                // If all attempts failed, try without SSL requirement as last resort
+                if (!$connected) {
+                    foreach ($attempts as $attempt) {
+                        try {
+                            $dsn = "pgsql:host={$attempt['host']};port={$attempt['port']};dbname={$db}";
+                            $this->pdo = new PDO($dsn, $user, $pass, [
+                                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                                PDO::ATTR_TIMEOUT => 10,
+                                PDO::ATTR_PERSISTENT => false
+                            ]);
+                            $connected = true;
+                            break;
+                        } catch (PDOException $e) {
+                            $lastError = $e;
+                            continue;
+                        }
                     }
                 }
                 
