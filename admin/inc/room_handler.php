@@ -60,16 +60,26 @@ class RoomHandler {
         foreach ($rooms as $room) {
             try {
                 // Check how many students are already scheduled in this room at this time
-                $stmt = $this->conn->prepare("
-                    SELECT COUNT(*) as count 
-                    FROM schedule_admission 
-                    WHERE DATE(date_scheduled) = DATE(?) 
-                    AND time_slot = ? 
-                    AND room_number = ? 
-                    AND status != 'Rejected'
-                ");
+                // Use CAST for PostgreSQL compatibility, DATE() for MySQL
+                $dbType = property_exists($this->conn, 'dbType') ? $this->conn->dbType : 'mysql';
+                if ($dbType === 'pgsql') {
+                    $sql = "SELECT COUNT(*) as count 
+                            FROM schedule_admission 
+                            WHERE date_scheduled::date = ?::date 
+                            AND time_slot = ? 
+                            AND room_number = ? 
+                            AND status != 'Rejected'";
+                } else {
+                    $sql = "SELECT COUNT(*) as count 
+                            FROM schedule_admission 
+                            WHERE DATE(date_scheduled) = DATE(?) 
+                            AND time_slot = ? 
+                            AND room_number = ? 
+                            AND status != 'Rejected'";
+                }
+                $stmt = $this->conn->prepare($sql);
                 if (!$stmt) {
-                    error_log("Prepare failed in getAvailableRooms for room: " . $room['room_number']);
+                    error_log("Prepare failed in getAvailableRooms for room: " . ($room['room_number'] ?? 'unknown'));
                     continue;
                 }
                 $stmt->bind_param("sss", $date, $timeSlot, $room['room_number']);

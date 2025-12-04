@@ -35,7 +35,8 @@ if($_settings->chk_flashdata('success')): ?>
 							<h3><?php 
 							try {
 								// Handle both 'role' and 'type' columns for compatibility
-								$qry = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE (role = 2 OR type = 2)");
+								// Cast to integer to handle both string and integer values
+								$qry = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE (CAST(role AS INTEGER) = 2 OR CAST(type AS INTEGER) = 2 OR role = '2' OR type = '2')");
 								if ($qry) {
 									$row = $qry->fetch_assoc();
 									echo (int)($row['cnt'] ?? 0);
@@ -43,8 +44,19 @@ if($_settings->chk_flashdata('success')): ?>
 									echo 0;
 								}
 							} catch (Exception $e) {
-								error_log("Error counting staff: " . $e->getMessage());
-								echo 0;
+								// Fallback to simpler query if CAST fails
+								try {
+									$qry = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE role = 2 OR type = 2");
+									if ($qry) {
+										$row = $qry->fetch_assoc();
+										echo (int)($row['cnt'] ?? 0);
+									} else {
+										echo 0;
+									}
+								} catch (Exception $e2) {
+									error_log("Error counting staff: " . $e2->getMessage());
+									echo 0;
+								}
 							}
 							?></h3>
 							<p>Total Staff</p>
@@ -63,7 +75,8 @@ if($_settings->chk_flashdata('success')): ?>
 							<h3><?php 
 							try {
 								// Handle both 'role' and 'type' columns for compatibility
-								$qry = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE (role = 3 OR type = 3)");
+								// Cast to integer to handle both string and integer values
+								$qry = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE (CAST(role AS INTEGER) = 3 OR CAST(type AS INTEGER) = 3 OR role = '3' OR type = '3')");
 								if ($qry) {
 									$row = $qry->fetch_assoc();
 									echo (int)($row['cnt'] ?? 0);
@@ -71,8 +84,19 @@ if($_settings->chk_flashdata('success')): ?>
 									echo 0;
 								}
 							} catch (Exception $e) {
-								error_log("Error counting students: " . $e->getMessage());
-								echo 0;
+								// Fallback to simpler query if CAST fails
+								try {
+									$qry = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE role = 3 OR type = 3");
+									if ($qry) {
+										$row = $qry->fetch_assoc();
+										echo (int)($row['cnt'] ?? 0);
+									} else {
+										echo 0;
+									}
+								} catch (Exception $e2) {
+									error_log("Error counting students: " . $e2->getMessage());
+									echo 0;
+								}
 							}
 							?></h3>
 							<p>Total Students</p>
