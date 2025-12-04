@@ -2,6 +2,11 @@
 require_once __DIR__ . '/../inc/db_connect.php';
 require_once __DIR__ . '/../inc/db_handler.php';
 
+// Ensure connection is available
+if (!isset($conn) || $conn === null) {
+    die('Database connection failed. Please check your configuration.');
+}
+
 $db = new DatabaseHandler($conn);
 
 // Get filter parameters
@@ -11,7 +16,7 @@ $filterTimeSlot = $_GET['filter_time_slot'] ?? '';
 $filterRoom = $_GET['filter_room'] ?? '';
 $filterStatus = $_GET['filter_status'] ?? 'Approved'; // Default to Approved
 
-// Build query with filters
+// Build query with filters (compatible with both MySQL and PostgreSQL)
 $sql = "SELECT * FROM schedule_admission WHERE status != 'Rejected'";
 $params = [];
 $types = '';
@@ -48,12 +53,26 @@ if (!empty($filterStatus)) {
 
 $sql .= " ORDER BY date_scheduled, time_slot, room_number";
 
+// Use prepared statement with proper parameter binding
 $stmt = $conn->prepare($sql);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
+if ($stmt && !empty($params)) {
+    // Bind parameters one by one for compatibility
+    $refs = [];
+    foreach ($params as $key => $value) {
+        $refs[$key] = &$params[$key];
+    }
+    call_user_func_array([$stmt, 'bind_param'], array_merge([$types], $refs));
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else if ($stmt) {
+    // No parameters, just execute
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    // Fallback to direct query if prepare fails
+    error_log("Prepare failed, using direct query");
+    $result = $conn->query($sql);
 }
-$stmt->execute();
-$result = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">

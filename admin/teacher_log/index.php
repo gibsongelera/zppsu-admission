@@ -3,6 +3,11 @@ require_once __DIR__ . '/../inc/db_connect.php';
 require_once __DIR__ . '/../inc/db_handler.php';
 require_once __DIR__ . '/../inc/view_helper.php';
 
+// Ensure connection is available
+if (!isset($conn) || $conn === null) {
+    die('Database connection failed. Please check your configuration.');
+}
+
 $db = new DatabaseHandler($conn);
 ?>
 <!DOCTYPE html>

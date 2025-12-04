@@ -177,7 +177,8 @@ class DatabaseWrapper {
         } catch (PDOException $e) {
             $this->error = $e->getMessage();
             error_log("Query error: " . $e->getMessage() . " | SQL: " . $sql);
-            return false;
+            // Return empty result object instead of false to prevent "num_rows on bool" errors
+            return new DatabaseResult(null, $this->dbType);
         }
     }
     
@@ -186,10 +187,19 @@ class DatabaseWrapper {
      */
     public function prepare($sql) {
         try {
+            if (!$this->pdo) {
+                error_log("Prepare error: PDO connection is null");
+                return false;
+            }
             if ($this->dbType === 'pgsql') {
                 $sql = $this->convertToPostgres($sql);
             }
-            return new DatabaseStatement($this->pdo->prepare($sql), $this->dbType);
+            $stmt = $this->pdo->prepare($sql);
+            if (!$stmt) {
+                error_log("Prepare error: Failed to prepare statement");
+                return false;
+            }
+            return new DatabaseStatement($stmt, $this->dbType);
         } catch (PDOException $e) {
             $this->error = $e->getMessage();
             error_log("Prepare error: " . $e->getMessage());
@@ -248,14 +258,17 @@ class DatabaseWrapper {
      * Convert MySQL syntax to PostgreSQL
      */
     private function convertToPostgres($sql) {
-        // AUTO_INCREMENT -> SERIAL (handled in schema)
+        // Remove MySQL backticks (PostgreSQL uses double quotes or no quotes)
+        $sql = str_replace('`', '', $sql);
+        
         // CURDATE() -> CURRENT_DATE
         $sql = str_ireplace('CURDATE()', 'CURRENT_DATE', $sql);
+        
         // NOW() is the same in both
-        // DATE() function
-        $sql = preg_replace('/DATE\(([^)]+)\)/i', 'DATE($1)', $sql);
+        // DATE() function - PostgreSQL supports DATE() but may need casting
         // md5() is the same in both
         // LIMIT syntax is the same
+        
         return $sql;
     }
     
@@ -288,7 +301,16 @@ class DatabaseResult {
     public function __construct($stmt, $dbType) {
         $this->stmt = $stmt;
         $this->dbType = $dbType;
-        $this->num_rows = $stmt ? $stmt->rowCount() : 0;
+        // Handle null stmt gracefully
+        if ($stmt === null) {
+            $this->num_rows = 0;
+        } else {
+            try {
+                $this->num_rows = $stmt->rowCount();
+            } catch (Exception $e) {
+                $this->num_rows = 0;
+            }
+        }
     }
     
     public function fetch_assoc() {

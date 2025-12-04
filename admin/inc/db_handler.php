@@ -7,8 +7,14 @@ class DatabaseHandler {
      * Initialize database handler
      */
     public function __construct($connection) {
+        if ($connection === null) {
+            error_log("DatabaseHandler: Connection is null!");
+            throw new Exception("Database connection is null");
+        }
         $this->conn = $connection;
-        $this->conn->set_charset("utf8mb4");
+        if (method_exists($this->conn, 'set_charset')) {
+            $this->conn->set_charset("utf8mb4");
+        }
     }
 
     /**
@@ -16,10 +22,27 @@ class DatabaseHandler {
      */
     public function getAllRecords() {
         try {
-            return $this->conn->query("SELECT * FROM schedule_admission ORDER BY created_at DESC");
+            if ($this->conn === null) {
+                error_log("getAllRecords: Connection is null!");
+                // This should not happen if __construct throws, but handle gracefully
+                throw new Exception("Database connection is null");
+            }
+            // Use date_log instead of created_at for compatibility (works with both MySQL and PostgreSQL)
+            $result = $this->conn->query("SELECT * FROM schedule_admission ORDER BY date_log DESC, id DESC");
+            return $result; // query() always returns DatabaseResult now
         } catch (Exception $e) {
             error_log("Error fetching records: " . $e->getMessage());
-            return false;
+            // Return empty query result - query() will return DatabaseResult with num_rows=0
+            if ($this->conn) {
+                return $this->conn->query("SELECT * FROM schedule_admission WHERE 1=0");
+            }
+            // This should not happen, but if it does, we need DatabaseResult
+            // Since db_connect.php should be included before this file, DatabaseResult should exist
+            if (class_exists('DatabaseResult')) {
+                return new DatabaseResult(null, 'mysql');
+            }
+            // Last resort: return null and let calling code handle it
+            return null;
         }
     }
 

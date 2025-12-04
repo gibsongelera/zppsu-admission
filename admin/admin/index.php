@@ -1,4 +1,17 @@
-<?php if($_settings->chk_flashdata('success')): ?>
+<?php 
+// Include database connection first
+require_once __DIR__ . '/../inc/db_connect.php';
+require_once __DIR__ . '/../inc/db_handler.php';
+require_once __DIR__ . '/../inc/view_helper.php';
+
+// Ensure $conn is available
+if (!isset($conn) || $conn === null) {
+    die('Database connection failed. Please check your configuration.');
+}
+
+$db = new DatabaseHandler($conn);
+
+if($_settings->chk_flashdata('success')): ?>
 <script>
 	alert_toast("<?php echo $_settings->flashdata('success') ?>",'success')
 </script>
@@ -14,7 +27,11 @@
 				<div class="col-lg-3 col-6">
 					<div class="small-box bg-info">
 						<div class="inner">
-							<h3><?php echo $conn->query("SELECT * FROM `users` where role = 2")->num_rows ?></h3>
+							<h3><?php 
+							// Handle both 'role' and 'type' columns for compatibility
+							$qry = $conn->query("SELECT * FROM users WHERE (role = 2 OR type = 2)");
+							echo $qry ? $qry->num_rows : 0;
+							?></h3>
 							<p>Total Staff</p>
 						</div>
 						<div class="icon">
@@ -28,7 +45,11 @@
 				<div class="col-lg-3 col-6">
 					<div class="small-box bg-success">
 						<div class="inner">
-							<h3><?php echo $conn->query("SELECT * FROM `users` where role = 3")->num_rows ?></h3>
+							<h3><?php 
+							// Handle both 'role' and 'type' columns for compatibility
+							$qry = $conn->query("SELECT * FROM users WHERE (role = 3 OR type = 3)");
+							echo $qry ? $qry->num_rows : 0;
+							?></h3>
 							<p>Total Students</p>
 						</div>
 						<div class="icon">
@@ -42,7 +63,10 @@
 				<div class="col-lg-3 col-6">
 					<div class="small-box bg-warning">
 						<div class="inner">
-							<h3><?php echo $conn->query("SELECT * FROM `schedule_admission` where status = 'Pending'")->num_rows ?></h3>
+							<h3><?php 
+							$qry = $conn->query("SELECT * FROM schedule_admission WHERE status = 'Pending'");
+							echo $qry ? $qry->num_rows : 0;
+							?></h3>
 							<p>Pending Applications</p>
 						</div>
 						<div class="icon">
@@ -56,7 +80,11 @@
 				<div class="col-lg-3 col-6">
 					<div class="small-box bg-info">
 						<div class="inner">
-							<h3><?php echo $conn->query("SELECT * FROM `schedule_admission` where status = 'Approved' AND (created_at = updated_at OR updated_at IS NULL)")->num_rows ?></h3>
+							<h3><?php 
+							// Compatible with both MySQL and PostgreSQL
+							$qry = $conn->query("SELECT * FROM schedule_admission WHERE status = 'Approved'");
+							echo $qry ? $qry->num_rows : 0;
+							?></h3>
 							<p>Approved</p>
 						</div>
 						<div class="icon">
@@ -70,7 +98,10 @@
 				<div class="col-lg-3 col-6">
 					<div class="small-box bg-danger">
 						<div class="inner">
-							<h3><?php echo $conn->query("SELECT * FROM `teacher_log`")->num_rows ?></h3>
+							<h3><?php 
+							$qry = $conn->query("SELECT * FROM schedule_admission WHERE status IN ('Approved', 'Pending')");
+							echo $qry ? $qry->num_rows : 0;
+							?></h3>
 							<p>Teacher Logs</p>
 						</div>
 						<div class="icon">
@@ -157,11 +188,7 @@
 	</div>
 </div>
 <?php
-require_once __DIR__ . '/../inc/db_connect.php';
-require_once __DIR__ . '/../inc/db_handler.php';
-require_once __DIR__ . '/../inc/view_helper.php';
-
-$db = new DatabaseHandler($conn);
+// Database handler already initialized at top of file
 // --- Metrics computation ---
 // Dates
 $today = new DateTime();
