@@ -1,30 +1,33 @@
+# Render Blueprint - ZPPSU Admission System
+# Documentation: https://render.com/docs/blueprint-spec
+
 services:
   - type: web
     name: zppsu-admission
-    env: php
-    plan: free
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     region: oregon
-
-    # Root of your PHP app
-    rootDir: .
-
-    # No special build step (you are not using Composer yet)
-    buildCommand: ""
-
-    # Start a PHP built-in server on the port Render provides
-    startCommand: php -S 0.0.0.0:$PORT -t .
-
+    plan: free
+    branch: main
+    healthCheckPath: /
     envVars:
-      # Supabase / DB settings (fill these in on Render dashboard, not here)
+      # Database configuration for Supabase PostgreSQL
       - key: DB_HOST
-        sync: false
+        value: db.nvojdxaektltusfprjaq.supabase.co
       - key: DB_PORT
         value: "5432"
-      - key: DB_USER
-        sync: false
-      - key: DB_PASS
-        sync: false
       - key: DB_NAME
-        sync: false
-
-
+        value: postgres
+      - key: DB_USER
+        value: postgres
+      - key: DB_PASS
+        sync: false  # Set this manually in Render dashboard for security
+      - key: DB_TYPE
+        value: pgsql
+      # Render detection
+      - key: RENDER
+        value: "true"
+      # PHP settings
+      - key: PHP_DISPLAY_ERRORS
+        value: "On"

@@ -19,7 +19,17 @@ $dev_data = array(
     'date_added'  => ''
 );
 
-if (!defined('base_url'))  define('base_url', 'http://localhost/zppsu_admission/');
+// Detect if we're on Render (cloud) or local
+$isCloud = getenv('RENDER') || getenv('DB_HOST');
+
+if ($isCloud) {
+    // Cloud deployment (Render + Supabase)
+    if (!defined('base_url')) define('base_url', 'https://' . ($_SERVER['HTTP_HOST'] ?? 'zppsu-admission.onrender.com') . '/');
+} else {
+    // Local development
+    if (!defined('base_url')) define('base_url', 'http://localhost/zppsu_admission/');
+}
+
 if (!defined('base_app'))  define('base_app', str_replace('\\','/', __DIR__) . '/');
 if (!defined('dev_data'))  define('dev_data', $dev_data);
 
@@ -28,13 +38,14 @@ if (!defined('dev_data'))  define('dev_data', $dev_data);
  *
  * Defaults are the original local MySQL settings so the app
  * still works in XAMPP. When you deploy, override these using
- * environment variables (for example, with Supabase PostgreSQL):
+ * environment variables (for Supabase PostgreSQL):
  *
  *   DB_HOST = db.xxx.supabase.co
  *   DB_PORT = 5432
  *   DB_USER = postgres
  *   DB_PASS = your_db_password
- *   DB_NAME = postgres (or your custom DB name)
+ *   DB_NAME = postgres
+ *   DB_TYPE = pgsql (for PostgreSQL) or mysql (for MySQL)
  */
 
 if (!defined('DB_SERVER')) {
@@ -51,5 +62,10 @@ if (!defined('DB_NAME')) {
 }
 if (!defined('DB_PORT')) {
     define('DB_PORT', getenv('DB_PORT') ?: '3306');
+}
+if (!defined('DB_TYPE')) {
+    // Auto-detect: if port is 5432, assume PostgreSQL
+    $port = getenv('DB_PORT') ?: '3306';
+    define('DB_TYPE', $port == '5432' ? 'pgsql' : 'mysql');
 }
 ?>
