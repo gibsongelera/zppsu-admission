@@ -19,6 +19,35 @@ CREATE TABLE IF NOT EXISTS users (
     last_login TIMESTAMP
 );
 
+-- Add missing columns to users table if it already exists
+DO $$ 
+BEGIN
+    -- Add type if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='type') THEN
+        ALTER TABLE users ADD COLUMN type SMALLINT DEFAULT 3;
+    END IF;
+    
+    -- Add avatar if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='avatar') THEN
+        ALTER TABLE users ADD COLUMN avatar TEXT;
+    END IF;
+    
+    -- Add middlename if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='middlename') THEN
+        ALTER TABLE users ADD COLUMN middlename VARCHAR(255);
+    END IF;
+    
+    -- Add date_updated if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='date_updated') THEN
+        ALTER TABLE users ADD COLUMN date_updated TIMESTAMP;
+    END IF;
+    
+    -- Add last_login if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='last_login') THEN
+        ALTER TABLE users ADD COLUMN last_login TIMESTAMP;
+    END IF;
+END $$;
+
 -- System settings table
 CREATE TABLE IF NOT EXISTS system_settings (
     id SERIAL PRIMARY KEY,
@@ -151,6 +180,19 @@ CREATE TABLE IF NOT EXISTS room_assignments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Add unique constraint on room_assignments if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'room_assignments_room_campus_key'
+    ) THEN
+        ALTER TABLE room_assignments 
+        ADD CONSTRAINT room_assignments_room_campus_key 
+        UNIQUE (room_number, campus);
+    END IF;
+END $$;
+
 -- SMS log table
 CREATE TABLE IF NOT EXISTS sms_log (
     id SERIAL PRIMARY KEY,
@@ -229,9 +271,20 @@ BEGIN
 END $$;
 
 -- Insert default admin user (password: admin123)
-INSERT INTO users (firstname, lastname, username, password, type) 
-VALUES ('Admin', 'User', 'admin', MD5('admin123'), 1)
-ON CONFLICT (username) DO NOTHING;
+DO $$
+BEGIN
+    -- Only insert if type column exists (it should after the ALTER TABLE above)
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='type') THEN
+        INSERT INTO users (firstname, lastname, username, password, type) 
+        VALUES ('Admin', 'User', 'admin', MD5('admin123'), 1)
+        ON CONFLICT (username) DO NOTHING;
+    ELSE
+        -- Fallback: insert without type column
+        INSERT INTO users (firstname, lastname, username, password) 
+        VALUES ('Admin', 'User', 'admin', MD5('admin123'))
+        ON CONFLICT (username) DO NOTHING;
+    END IF;
+END $$;
 
 -- Insert default system settings
 INSERT INTO system_settings (id, name, short_name) 
@@ -242,15 +295,15 @@ ON CONFLICT (id) DO NOTHING;
 DO $$
 BEGIN
     INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 101', 'ZPPSU MAIN', 30)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (room_number, campus) DO NOTHING;
     INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 102', 'ZPPSU MAIN', 30)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (room_number, campus) DO NOTHING;
     INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 103', 'ZPPSU MAIN', 25)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (room_number, campus) DO NOTHING;
     INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 201', 'ZPPSU MAIN', 40)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (room_number, campus) DO NOTHING;
     INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 101', 'ZPPSU CAMPUS 2', 30)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (room_number, campus) DO NOTHING;
 EXCEPTION WHEN OTHERS THEN
     -- Ignore errors from duplicate inserts
     NULL;
