@@ -24,10 +24,11 @@ $isCloud = getenv('RENDER') || getenv('DB_HOST');
 
 if ($isCloud) {
     // Cloud deployment (Render + Supabase)
-    // Get the host without port if it's the default HTTPS port
+    // Get the host and strip any port numbers
     $host = $_SERVER['HTTP_HOST'] ?? 'zppsu-admission.onrender.com';
-    // Remove port if it's 443 (default HTTPS) or 1000 (Render internal)
-    $host = preg_replace('/:(443|1000)$/', '', $host);
+    // Remove any port number (including 1000, 443, etc.)
+    $host = preg_replace('/:\d+$/', '', $host);
+    // Ensure we use https for cloud
     if (!defined('base_url')) define('base_url', 'https://' . $host . '/');
 } else {
     // Local development

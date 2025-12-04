@@ -252,40 +252,68 @@ $weekEnd = (new DateTime())->modify('sunday this week');
 $lastWeekStart = (clone $weekStart)->modify('-7 days');
 $lastWeekEnd = (clone $weekEnd)->modify('-7 days');
 
-// Totals
-$totalSend = $db->getScheduleCount();
-$thisWeekSend = $db->getScheduleCountInRange($weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d'));
-$lastWeekSend = $db->getScheduleCountInRange($lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d'));
+// Totals - with error handling
+try {
+    $totalSend = $db ? $db->getScheduleCount() : 0;
+    $thisWeekSend = $db ? $db->getScheduleCountInRange($weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d')) : 0;
+    $lastWeekSend = $db ? $db->getScheduleCountInRange($lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d')) : 0;
+} catch (Exception $e) {
+    error_log("Dashboard totals error: " . $e->getMessage());
+    $totalSend = $thisWeekSend = $lastWeekSend = 0;
+}
 $thisWeekPctOfTotal = $totalSend > 0 ? round(($thisWeekSend / $totalSend) * 100) : 0;
 $wowSend = $lastWeekSend > 0 ? round((($thisWeekSend - $lastWeekSend) / $lastWeekSend) * 100) : ($thisWeekSend > 0 ? 100 : 0);
 
-// Status-based
-$totalSuccess = $db->getScheduleCount('Approved');
-$thisWeekSuccess = $db->getScheduleCountInRange($weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d'), 'Approved');
-$lastWeekSuccess = $db->getScheduleCountInRange($lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d'), 'Approved');
-$wowSuccess = $lastWeekSuccess > 0 ? round((($thisWeekSuccess - $lastWeekSuccess) / $lastWeekSuccess) * 100) : ($thisWeekSuccess > 0 ? 100 : 0);
+// Status-based - with error handling
+try {
+    $totalSuccess = $db ? $db->getScheduleCount('Approved') : 0;
+    $thisWeekSuccess = $db ? $db->getScheduleCountInRange($weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d'), 'Approved') : 0;
+    $lastWeekSuccess = $db ? $db->getScheduleCountInRange($lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d'), 'Approved') : 0;
+    $wowSuccess = $lastWeekSuccess > 0 ? round((($thisWeekSuccess - $lastWeekSuccess) / $lastWeekSuccess) * 100) : ($thisWeekSuccess > 0 ? 100 : 0);
 
-$totalFailed = $db->getScheduleCount('Rejected');
-$thisWeekFailed = $db->getScheduleCountInRange($weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d'), 'Rejected');
-$lastWeekFailed = $db->getScheduleCountInRange($lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d'), 'Rejected');
-$wowFailed = $lastWeekFailed > 0 ? round((($thisWeekFailed - $lastWeekFailed) / $lastWeekFailed) * 100) : ($thisWeekFailed > 0 ? 100 : 0);
+    $totalFailed = $db ? $db->getScheduleCount('Rejected') : 0;
+    $thisWeekFailed = $db ? $db->getScheduleCountInRange($weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d'), 'Rejected') : 0;
+    $lastWeekFailed = $db ? $db->getScheduleCountInRange($lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d'), 'Rejected') : 0;
+    $wowFailed = $lastWeekFailed > 0 ? round((($thisWeekFailed - $lastWeekFailed) / $lastWeekFailed) * 100) : ($thisWeekFailed > 0 ? 100 : 0);
+} catch (Exception $e) {
+    error_log("Dashboard status error: " . $e->getMessage());
+    $totalSuccess = $thisWeekSuccess = $lastWeekSuccess = 0;
+    $totalFailed = $thisWeekFailed = $lastWeekFailed = 0;
+    $wowSuccess = $wowFailed = 0;
+}
 
-// Users
-$totalStudents = $db->getUsersCountByRole(3);
-$totalStaff = $db->getUsersCountByRole(2);
-$studentsThisWeek = $db->getUsersCountByRole(3, $weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d'));
-$studentsLastWeek = $db->getUsersCountByRole(3, $lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d'));
-$wowStudents = $studentsLastWeek > 0 ? round((($studentsThisWeek - $studentsLastWeek) / $studentsLastWeek) * 100) : ($studentsThisWeek > 0 ? 100 : 0);
-$staffsThisWeek = $db->getUsersCountByRole(2, $weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d'));
-$staffsLastWeek = $db->getUsersCountByRole(2, $lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d'));
-$wowStaff = $staffsLastWeek > 0 ? round((($staffsThisWeek - $staffsLastWeek) / $staffsLastWeek) * 100) : ($staffsThisWeek > 0 ? 100 : 0);
+// Users - with error handling
+try {
+    $totalStudents = $db ? $db->getUsersCountByRole(3) : 0;
+    $totalStaff = $db ? $db->getUsersCountByRole(2) : 0;
+    $studentsThisWeek = $db ? $db->getUsersCountByRole(3, $weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d')) : 0;
+    $studentsLastWeek = $db ? $db->getUsersCountByRole(3, $lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d')) : 0;
+    $wowStudents = $studentsLastWeek > 0 ? round((($studentsThisWeek - $studentsLastWeek) / $studentsLastWeek) * 100) : ($studentsThisWeek > 0 ? 100 : 0);
+    $staffsThisWeek = $db ? $db->getUsersCountByRole(2, $weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d')) : 0;
+    $staffsLastWeek = $db ? $db->getUsersCountByRole(2, $lastWeekStart->format('Y-m-d'), $lastWeekEnd->format('Y-m-d')) : 0;
+    $wowStaff = $staffsLastWeek > 0 ? round((($staffsThisWeek - $staffsLastWeek) / $staffsLastWeek) * 100) : ($staffsThisWeek > 0 ? 100 : 0);
+} catch (Exception $e) {
+    error_log("Dashboard users error: " . $e->getMessage());
+    $totalStudents = $totalStaff = 0;
+    $studentsThisWeek = $studentsLastWeek = 0;
+    $staffsThisWeek = $staffsLastWeek = 0;
+    $wowStudents = $wowStaff = 0;
+}
 
-// Charts
-$dailyData = $db->getDailyScheduleCounts(14);
-$dailyLabels = array_keys($dailyData);
-$dailyCounts = array_values($dailyData);
-$monthlyCountsAssoc = $db->getMonthlyScheduleCounts((int)$today->format('Y'));
-$monthlyCounts = array_values($monthlyCountsAssoc);
+// Charts - with error handling
+try {
+    $dailyData = $db ? $db->getDailyScheduleCounts(14) : [];
+    $dailyLabels = !empty($dailyData) ? array_keys($dailyData) : [];
+    $dailyCounts = !empty($dailyData) ? array_values($dailyData) : [];
+    $monthlyCountsAssoc = $db ? $db->getMonthlyScheduleCounts((int)$today->format('Y')) : [];
+    $monthlyCounts = !empty($monthlyCountsAssoc) ? array_values($monthlyCountsAssoc) : [];
+} catch (Exception $e) {
+    error_log("Dashboard charts error: " . $e->getMessage());
+    $dailyData = [];
+    $dailyLabels = [];
+    $dailyCounts = [];
+    $monthlyCounts = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
