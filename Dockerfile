@@ -17,6 +17,19 @@ RUN apt-get update && apt-get install -y \
         gd \
     && rm -rf /var/lib/apt/lists/*
 
+# Enable Apache modules
+RUN a2enmod rewrite headers
+
+# Allow .htaccess overrides
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+
+# Set ServerName to suppress warning
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# Copy and set up startup script to handle PORT environment variable
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Set working directory to Apache doc root
 WORKDIR /var/www/html
 
@@ -27,16 +40,6 @@ COPY . /var/www/html
 RUN mkdir -p /var/www/html/uploads/qrcodes \
     && chmod -R 777 /var/www/html/uploads
 
-# Enable Apache rewrite
-RUN a2enmod rewrite
-
-# Allow .htaccess overrides
-RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
-
-# Render sets a PORT env var; make Apache listen on it
-ENV APACHE_LISTEN_PORT=${PORT:-10000}
-RUN sed -i "s/80/\${APACHE_LISTEN_PORT}/g" /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
-
 # Set PHP error reporting for debugging (remove in production)
 RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/errors.ini \
     && echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/errors.ini \
@@ -44,4 +47,4 @@ RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/errors.ini \
 
 EXPOSE 10000
 
-CMD ["apache2-foreground"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
