@@ -232,10 +232,29 @@ class DatabaseHandler {
         $data = [];
         try {
             $start = (new DateTime())->modify('-' . ((int)$days - 1) . ' days')->format('Y-m-d');
-            $stmt = $this->conn->prepare("SELECT DATE(created_at) AS d, COUNT(*) AS cnt FROM schedule_admission WHERE DATE(created_at) >= ? GROUP BY d ORDER BY d");
+            // Use date_log instead of created_at for compatibility
+            $stmt = $this->conn->prepare("SELECT DATE(date_log) AS d, COUNT(*) AS cnt FROM schedule_admission WHERE DATE(date_log) >= ? GROUP BY d ORDER BY d");
+            if (!$stmt) {
+                error_log("Prepare failed in getDailyScheduleCounts");
+                // Return empty array with zeros
+                for ($i = 0; $i < $days; $i++) {
+                    $key = (new DateTime($start))->modify("+{$i} days")->format('Y-m-d');
+                    $data[$key] = 0;
+                }
+                return $data;
+            }
             $stmt->bind_param("s", $start);
             $stmt->execute();
-            $res = $stmt->get_result();
+            $result = $stmt->get_result();
+            if (!$result) {
+                // Return empty array with zeros
+                for ($i = 0; $i < $days; $i++) {
+                    $key = (new DateTime($start))->modify("+{$i} days")->format('Y-m-d');
+                    $data[$key] = 0;
+                }
+                return $data;
+            }
+            $res = $result;
             // Initialize with zeros
             for ($i = 0; $i < $days; $i++) {
                 $key = (new DateTime($start))->modify("+{$i} days")->format('Y-m-d');
@@ -246,6 +265,12 @@ class DatabaseHandler {
             }
         } catch (Exception $e) {
             error_log("Error fetching daily counts: " . $e->getMessage());
+            // Return empty array with zeros on error
+            $start = (new DateTime())->modify('-' . ((int)$days - 1) . ' days')->format('Y-m-d');
+            for ($i = 0; $i < $days; $i++) {
+                $key = (new DateTime($start))->modify("+{$i} days")->format('Y-m-d');
+                $data[$key] = 0;
+            }
         }
         return $data; // associative date => count
     }

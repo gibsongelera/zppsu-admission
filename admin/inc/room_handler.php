@@ -15,18 +15,33 @@ class RoomHandler {
      * Get all rooms by campus
      */
     public function getRoomsByCampus($campus) {
-        $stmt = $this->conn->prepare("SELECT * FROM room_assignments WHERE campus = ? AND is_active = 1 ORDER BY room_number");
-        $stmt->bind_param("s", $campus);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $rooms = [];
-        while ($row = $result->fetch_assoc()) {
-            $rooms[] = $row;
+        try {
+            $stmt = $this->conn->prepare("SELECT * FROM room_assignments WHERE campus = ? AND is_active = 1 ORDER BY room_number");
+            if (!$stmt) {
+                error_log("Prepare failed in getRoomsByCampus");
+                return [];
+            }
+            $stmt->bind_param("s", $campus);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if (!$result) {
+                return [];
+            }
+            
+            $rooms = [];
+            while ($row = $result->fetch_assoc()) {
+                $rooms[] = $row;
+            }
+            
+            if (method_exists($stmt, 'close')) {
+                $stmt->close();
+            }
+            return $rooms;
+        } catch (Exception $e) {
+            error_log("Error in getRoomsByCampus: " . $e->getMessage());
+            return [];
         }
-        
-        $stmt->close();
-        return $rooms;
     }
     
     /**
@@ -43,27 +58,41 @@ class RoomHandler {
         $availableRooms = [];
         
         foreach ($rooms as $room) {
-            // Check how many students are already scheduled in this room at this time
-            $stmt = $this->conn->prepare("
-                SELECT COUNT(*) as count 
-                FROM schedule_admission 
-                WHERE DATE(date_scheduled) = DATE(?) 
-                AND time_slot = ? 
-                AND room_number = ? 
-                AND status != 'Rejected'
-            ");
-            $stmt->bind_param("sss", $date, $timeSlot, $room['room_number']);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row = $result->fetch_assoc();
-            $currentCount = (int)$row['count'];
-            $stmt->close();
-            
-            // Check if room has available capacity
-            if ($currentCount < $room['capacity']) {
-                $room['available_slots'] = $room['capacity'] - $currentCount;
-                $room['occupied_slots'] = $currentCount;
-                $availableRooms[] = $room;
+            try {
+                // Check how many students are already scheduled in this room at this time
+                $stmt = $this->conn->prepare("
+                    SELECT COUNT(*) as count 
+                    FROM schedule_admission 
+                    WHERE DATE(date_scheduled) = DATE(?) 
+                    AND time_slot = ? 
+                    AND room_number = ? 
+                    AND status != 'Rejected'
+                ");
+                if (!$stmt) {
+                    error_log("Prepare failed in getAvailableRooms for room: " . $room['room_number']);
+                    continue;
+                }
+                $stmt->bind_param("sss", $date, $timeSlot, $room['room_number']);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if (!$result) {
+                    continue;
+                }
+                $row = $result->fetch_assoc();
+                $currentCount = (int)($row['count'] ?? 0);
+                if (method_exists($stmt, 'close')) {
+                    $stmt->close();
+                }
+                
+                // Check if room has available capacity
+                if ($currentCount < $room['capacity']) {
+                    $room['available_slots'] = $room['capacity'] - $currentCount;
+                    $room['occupied_slots'] = $currentCount;
+                    $availableRooms[] = $room;
+                }
+            } catch (Exception $e) {
+                error_log("Error checking room availability: " . $e->getMessage());
+                continue;
             }
         }
         

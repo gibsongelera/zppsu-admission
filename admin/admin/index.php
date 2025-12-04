@@ -33,9 +33,19 @@ if($_settings->chk_flashdata('success')): ?>
 					<div class="small-box bg-info">
 						<div class="inner">
 							<h3><?php 
-							// Handle both 'role' and 'type' columns for compatibility
-							$qry = $conn->query("SELECT * FROM users WHERE (role = 2 OR type = 2)");
-							echo $qry ? $qry->num_rows : 0;
+							try {
+								// Handle both 'role' and 'type' columns for compatibility
+								$qry = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE (role = 2 OR type = 2)");
+								if ($qry) {
+									$row = $qry->fetch_assoc();
+									echo (int)($row['cnt'] ?? 0);
+								} else {
+									echo 0;
+								}
+							} catch (Exception $e) {
+								error_log("Error counting staff: " . $e->getMessage());
+								echo 0;
+							}
 							?></h3>
 							<p>Total Staff</p>
 						</div>
@@ -51,9 +61,19 @@ if($_settings->chk_flashdata('success')): ?>
 					<div class="small-box bg-success">
 						<div class="inner">
 							<h3><?php 
-							// Handle both 'role' and 'type' columns for compatibility
-							$qry = $conn->query("SELECT * FROM users WHERE (role = 3 OR type = 3)");
-							echo $qry ? $qry->num_rows : 0;
+							try {
+								// Handle both 'role' and 'type' columns for compatibility
+								$qry = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE (role = 3 OR type = 3)");
+								if ($qry) {
+									$row = $qry->fetch_assoc();
+									echo (int)($row['cnt'] ?? 0);
+								} else {
+									echo 0;
+								}
+							} catch (Exception $e) {
+								error_log("Error counting students: " . $e->getMessage());
+								echo 0;
+							}
 							?></h3>
 							<p>Total Students</p>
 						</div>
@@ -69,8 +89,18 @@ if($_settings->chk_flashdata('success')): ?>
 					<div class="small-box bg-warning">
 						<div class="inner">
 							<h3><?php 
-							$qry = $conn->query("SELECT * FROM schedule_admission WHERE status = 'Pending'");
-							echo $qry ? $qry->num_rows : 0;
+							try {
+								$qry = $conn->query("SELECT COUNT(*) as cnt FROM schedule_admission WHERE status = 'Pending'");
+								if ($qry) {
+									$row = $qry->fetch_assoc();
+									echo (int)($row['cnt'] ?? 0);
+								} else {
+									echo 0;
+								}
+							} catch (Exception $e) {
+								error_log("Error counting pending: " . $e->getMessage());
+								echo 0;
+							}
 							?></h3>
 							<p>Pending Applications</p>
 						</div>
@@ -86,9 +116,19 @@ if($_settings->chk_flashdata('success')): ?>
 					<div class="small-box bg-info">
 						<div class="inner">
 							<h3><?php 
-							// Compatible with both MySQL and PostgreSQL
-							$qry = $conn->query("SELECT * FROM schedule_admission WHERE status = 'Approved'");
-							echo $qry ? $qry->num_rows : 0;
+							try {
+								// Compatible with both MySQL and PostgreSQL
+								$qry = $conn->query("SELECT COUNT(*) as cnt FROM schedule_admission WHERE status = 'Approved'");
+								if ($qry) {
+									$row = $qry->fetch_assoc();
+									echo (int)($row['cnt'] ?? 0);
+								} else {
+									echo 0;
+								}
+							} catch (Exception $e) {
+								error_log("Error counting approved: " . $e->getMessage());
+								echo 0;
+							}
 							?></h3>
 							<p>Approved</p>
 						</div>
@@ -104,8 +144,18 @@ if($_settings->chk_flashdata('success')): ?>
 					<div class="small-box bg-danger">
 						<div class="inner">
 							<h3><?php 
-							$qry = $conn->query("SELECT * FROM schedule_admission WHERE status IN ('Approved', 'Pending')");
-							echo $qry ? $qry->num_rows : 0;
+							try {
+								$qry = $conn->query("SELECT COUNT(*) as cnt FROM schedule_admission WHERE status IN ('Approved', 'Pending')");
+								if ($qry) {
+									$row = $qry->fetch_assoc();
+									echo (int)($row['cnt'] ?? 0);
+								} else {
+									echo 0;
+								}
+							} catch (Exception $e) {
+								error_log("Error counting teacher logs: " . $e->getMessage());
+								echo 0;
+							}
 							?></h3>
 							<p>Teacher Logs</p>
 						</div>
