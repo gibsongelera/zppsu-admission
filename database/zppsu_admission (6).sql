@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 19, 2025 at 11:33 AM
+-- Generation Time: Dec 04, 2025 at 03:24 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,6 +24,32 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `bulk_reschedule_log`
+--
+
+CREATE TABLE `bulk_reschedule_log` (
+  `id` int(11) NOT NULL,
+  `old_date` date NOT NULL,
+  `new_date` date NOT NULL,
+  `campus` varchar(100) DEFAULT NULL,
+  `time_slot` varchar(50) DEFAULT NULL,
+  `reason` text DEFAULT NULL,
+  `performed_by` int(11) DEFAULT NULL,
+  `total_affected` int(11) DEFAULT 0,
+  `success_count` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bulk_reschedule_log`
+--
+
+INSERT INTO `bulk_reschedule_log` (`id`, `old_date`, `new_date`, `campus`, `time_slot`, `reason`, `performed_by`, `total_affected`, `success_count`, `created_at`) VALUES
+(1, '2025-12-06', '2025-12-07', 'ZPPSU MAIN', 'Morning (8AM-12PM)', 'Earthquake', 3, 1, 1, '2025-12-04 01:18:31');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `document_uploads`
 --
 
@@ -35,15 +61,6 @@ CREATE TABLE `document_uploads` (
   `file_path` varchar(500) NOT NULL,
   `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `document_uploads`
---
-
-INSERT INTO `document_uploads` (`id`, `schedule_id`, `document_type`, `file_name`, `file_path`, `uploaded_at`) VALUES
-(9, 4, 'Birth Certificate', 'dgdgdrhrt.png', 'Birth Certificate_4_691c57d3acac2.png', '2025-11-18 11:26:11'),
-(10, 4, 'Report Card', 'dgdgdrhrt.png', 'Report Card_4_691c57d3adde4.png', '2025-11-18 11:26:11'),
-(11, 4, 'Good Moral', 'dgdgdrhrt.png', 'Good Moral_4_691c57d3af27c.png', '2025-11-18 11:26:11');
 
 -- --------------------------------------------------------
 
@@ -165,6 +182,13 @@ CREATE TABLE `reschedule_history` (
   `rescheduled_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `reschedule_history`
+--
+
+INSERT INTO `reschedule_history` (`id`, `schedule_id`, `old_date`, `new_date`, `old_time_slot`, `new_time_slot`, `old_room`, `new_room`, `reason`, `rescheduled_by`, `rescheduled_at`) VALUES
+(1, 5, '2025-12-06', '2025-12-07', 'Morning (8AM-12PM)', 'Morning (8AM-12PM)', 'Room 101', NULL, 'Earthquake', 3, '2025-12-04 01:18:27');
+
 -- --------------------------------------------------------
 
 --
@@ -239,15 +263,18 @@ CREATE TABLE `schedule_admission` (
   `admission_slip_path` varchar(255) DEFAULT NULL,
   `last_sms_sent` timestamp NULL DEFAULT NULL,
   `reminder_sent` tinyint(1) DEFAULT 0,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `qr_code_path` varchar(255) DEFAULT NULL,
+  `qr_token` varchar(64) DEFAULT NULL,
+  `reschedule_count` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `schedule_admission`
 --
 
-INSERT INTO `schedule_admission` (`id`, `surname`, `given_name`, `middle_name`, `gender`, `age`, `dob`, `address`, `application_type`, `classification`, `grade_level`, `school_campus`, `email`, `phone`, `date_scheduled`, `time_slot`, `room_number`, `reference_number`, `lrn`, `previous_school`, `photo`, `document`, `created_at`, `status`, `exam_result`, `exam_remarks`, `exam_score`, `admission_slip_generated`, `admission_slip_path`, `last_sms_sent`, `reminder_sent`, `updated_at`) VALUES
-(4, 'GELERA', 'GIBSON', 'P', 'Male', 21, '2004-11-18', 'SAN ROQUE, FELECIANO STREET', '0', 'STEM', 'Grade 11', 'ZPPSU MAIN', 'gibsongelera@gmail.com', '+639166119231', '2025-11-23', 'Morning (8AM-12PM)', 'Room 101', '894-531-3951', '121548484545', 'FFH', 'dgdgdrhrt.png', '', '2025-11-18 11:26:11', 'Approved', 'Fail', 'GO HOME', 10.00, 0, NULL, NULL, 0, NULL);
+INSERT INTO `schedule_admission` (`id`, `surname`, `given_name`, `middle_name`, `gender`, `age`, `dob`, `address`, `application_type`, `classification`, `grade_level`, `school_campus`, `email`, `phone`, `date_scheduled`, `time_slot`, `room_number`, `reference_number`, `lrn`, `previous_school`, `photo`, `document`, `created_at`, `status`, `exam_result`, `exam_remarks`, `exam_score`, `admission_slip_generated`, `admission_slip_path`, `last_sms_sent`, `reminder_sent`, `updated_at`, `qr_code_path`, `qr_token`, `reschedule_count`) VALUES
+(5, 'student', 'student', 'P', 'Male', 21, '2004-12-04', 'SAN ROQUE, FELECIANO STREET', 'New Student', 'Bachelor of Industrial Technology major in Mechanical Technology (BINDTECH-MECHANICAL)', '1st Year', 'ZPPSU MAIN', 'gg@gmail.com', '+639971545203', '2025-12-07', 'Morning (8AM-12PM)', NULL, '359-186-1902', '132432432432', 'SAD', 'attendance-qr-mipaowtm.png', '', '2025-12-04 01:12:14', 'Approved', 'Pending', NULL, NULL, 0, NULL, NULL, 0, NULL, 'uploads/qrcodes/qr_359-186-1902_1764811133.png', '0e6a4aa04e8e11df215723cdd16741d140d04eb76fd8cd0e7ecc07b3de790b55', 1);
 
 -- --------------------------------------------------------
 
@@ -263,6 +290,13 @@ CREATE TABLE `sms_log` (
   `message_content` text DEFAULT NULL,
   `sent_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `sms_log`
+--
+
+INSERT INTO `sms_log` (`id`, `classification`, `phone`, `message_type`, `message_content`, `sent_at`) VALUES
+(1, 'Bachelor of Industrial Technology major in Mechanical Technology (BINDTECH-MECHANICAL)', '+639971545203', 'Approval', 'Auto-approval notification', '2025-12-04 01:12:16');
 
 -- --------------------------------------------------------
 
@@ -351,6 +385,14 @@ INSERT INTO `users` (`id`, `firstname`, `middlename`, `lastname`, `username`, `p
 --
 
 --
+-- Indexes for table `bulk_reschedule_log`
+--
+ALTER TABLE `bulk_reschedule_log`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_dates` (`old_date`,`new_date`),
+  ADD KEY `performed_by` (`performed_by`);
+
+--
 -- Indexes for table `document_uploads`
 --
 ALTER TABLE `document_uploads`
@@ -384,7 +426,14 @@ ALTER TABLE `room_assignments`
 -- Indexes for table `schedule_admission`
 --
 ALTER TABLE `schedule_admission`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_schedule_admission_date_status` (`date_scheduled`,`status`),
+  ADD KEY `idx_schedule_admission_campus` (`school_campus`),
+  ADD KEY `idx_schedule_admission_reference` (`reference_number`),
+  ADD KEY `idx_schedule_admission_lrn` (`lrn`),
+  ADD KEY `idx_schedule_admission_phone` (`phone`),
+  ADD KEY `idx_schedule_admission_email` (`email`),
+  ADD KEY `idx_schedule_admission_name` (`surname`,`given_name`);
 
 --
 -- Indexes for table `sms_log`
@@ -405,6 +454,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `bulk_reschedule_log`
+--
+ALTER TABLE `bulk_reschedule_log`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `document_uploads`
 --
 ALTER TABLE `document_uploads`
@@ -420,7 +475,7 @@ ALTER TABLE `programs`
 -- AUTO_INCREMENT for table `reschedule_history`
 --
 ALTER TABLE `reschedule_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `room_assignments`
@@ -432,13 +487,13 @@ ALTER TABLE `room_assignments`
 -- AUTO_INCREMENT for table `schedule_admission`
 --
 ALTER TABLE `schedule_admission`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `sms_log`
 --
 ALTER TABLE `sms_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -449,6 +504,12 @@ ALTER TABLE `users`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `bulk_reschedule_log`
+--
+ALTER TABLE `bulk_reschedule_log`
+  ADD CONSTRAINT `bulk_reschedule_log_ibfk_1` FOREIGN KEY (`performed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `document_uploads`

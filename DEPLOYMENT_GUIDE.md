@@ -30,12 +30,17 @@
    | Key | Value |
    |-----|-------|
    | `DB_HOST` | `db.nvojdxaektltusfprjaq.supabase.co` |
-   | `DB_PORT` | `5432` |
+   | `DB_PORT` | `6543` ⚠️ **Use connection pooler port** |
    | `DB_NAME` | `postgres` |
    | `DB_USER` | `postgres` |
    | `DB_PASS` | `[Your Supabase Database Password]` |
    | `DB_TYPE` | `pgsql` |
    | `RENDER` | `true` |
+
+   **Important:** Use port `6543` (connection pooler) instead of `5432` (direct connection). The pooler:
+   - Avoids IPv6 connection issues
+   - Is optimized for serverless/cloud deployments
+   - Provides better connection management
 
 3. **Save Changes**
    - Click "Save Changes" after adding all variables
@@ -67,11 +72,19 @@
 - Verify all environment variables are set
 - Make sure Supabase database is accessible
 
-### "Connection failed"
+### "Connection failed" or "Network is unreachable"
+- **Use Connection Pooler (Port 6543)**: Make sure `DB_PORT` is set to `6543`, not `5432`
+  - The connection pooler avoids IPv6 issues and works better on cloud platforms
+  - Direct connection (5432) may fail with IPv6 addresses
 - Verify `DB_PASS` is correct
 - Check if Supabase allows external connections
+- The code automatically resolves hostname to IPv4 when possible
 - Try connecting via psql from your computer first:
   ```
+  # Test connection pooler (recommended)
+  psql -h db.nvojdxaektltusfprjaq.supabase.co -p 6543 -d postgres -U postgres
+  
+  # Or test direct connection
   psql -h db.nvojdxaektltusfprjaq.supabase.co -p 5432 -d postgres -U postgres
   ```
 

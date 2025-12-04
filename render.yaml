@@ -13,10 +13,12 @@ services:
     healthCheckPath: /
     envVars:
       # Database configuration for Supabase PostgreSQL
+      # Using connection pooler (port 6543) for better reliability on cloud
+      # The pooler avoids IPv6 issues and is optimized for serverless deployments
       - key: DB_HOST
         value: db.nvojdxaektltusfprjaq.supabase.co
       - key: DB_PORT
-        value: "5432"
+        value: "6543"
       - key: DB_NAME
         value: postgres
       - key: DB_USER

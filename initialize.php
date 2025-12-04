@@ -61,11 +61,17 @@ if (!defined('DB_NAME')) {
     define('DB_NAME', getenv('DB_NAME') ?: 'zppsu_admission');
 }
 if (!defined('DB_PORT')) {
-    define('DB_PORT', getenv('DB_PORT') ?: '3306');
+    // Use Supabase connection pooler (6543) on Render for better reliability
+    // The pooler avoids IPv6 issues and is optimized for serverless/cloud
+    if ($isCloud && getenv('DB_TYPE') === 'pgsql') {
+        define('DB_PORT', getenv('DB_PORT') ?: '6543'); // Use pooler by default on cloud
+    } else {
+        define('DB_PORT', getenv('DB_PORT') ?: '3306');
+    }
 }
 if (!defined('DB_TYPE')) {
-    // Auto-detect: if port is 5432, assume PostgreSQL
-    $port = getenv('DB_PORT') ?: '3306';
-    define('DB_TYPE', $port == '5432' ? 'pgsql' : 'mysql');
+    // Auto-detect: if port is 5432 or 6543, assume PostgreSQL
+    $port = getenv('DB_PORT') ?: (($isCloud && getenv('DB_TYPE') === 'pgsql') ? '6543' : '3306');
+    define('DB_TYPE', ($port == '5432' || $port == '6543') ? 'pgsql' : 'mysql');
 }
 ?>

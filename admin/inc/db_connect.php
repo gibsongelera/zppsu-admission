@@ -31,10 +31,21 @@ class DatabaseWrapper {
         
         try {
             if ($type === 'pgsql') {
-                $dsn = "pgsql:host={$host};port={$port};dbname={$db}";
+                // For Supabase on cloud, prefer connection pooler (port 6543)
+                // It handles IPv4/IPv6 better and is optimized for serverless
+                $isCloud = getenv('RENDER') || getenv('DB_HOST');
+                
+                // Try IPv4 resolution first to avoid IPv6 issues
+                $ipv4 = $this->resolveIPv4($host);
+                $connectHost = $ipv4 ? $ipv4 : $host;
+                
+                $dsn = "pgsql:host={$connectHost};port={$port};dbname={$db}";
+                
                 $this->pdo = new PDO($dsn, $user, $pass, [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_TIMEOUT => 10,
+                    PDO::ATTR_PERSISTENT => false
                 ]);
             } else {
                 $dsn = "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4";
@@ -47,6 +58,18 @@ class DatabaseWrapper {
             $this->connect_error = $e->getMessage();
             throw new Exception('Connection failed: ' . $e->getMessage());
         }
+    }
+    
+    /**
+     * Resolve hostname to IPv4 address to avoid IPv6 connection issues
+     */
+    private function resolveIPv4($host) {
+        // Try to get IPv4 address (DNS_A record)
+        $records = @dns_get_record($host, DNS_A);
+        if ($records && isset($records[0]['ip'])) {
+            return $records[0]['ip'];
+        }
+        return false;
     }
     
     /**
