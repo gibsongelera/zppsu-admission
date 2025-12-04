@@ -957,25 +957,34 @@ document.addEventListener('DOMContentLoaded', function(){
         var timeSlot = $('#timeSlot').val();
         
         if (campus && date && timeSlot) {
-            $.get('<?php echo base_url ?>admin/inc/get_available_rooms.php', {
-                campus: campus,
-                date: date,
-                time_slot: timeSlot
-            }, function(data) {
-                if (data.success && data.rooms.length > 0) {
-                    var html = '<option value="">Select Room</option>';
-                    data.rooms.forEach(function(room) {
-                        html += '<option value="' + room.room_number + '">' + room.room_number + ' (Available: ' + room.available_slots + '/' + room.capacity + ')</option>';
-                    });
-                    $('#roomNumber').html(html);
-                    $('#room_availability').text(data.rooms.length + ' room(s) available').removeClass('text-danger').addClass('text-success');
-                } else {
-                    $('#roomNumber').html('<option value="">No rooms available</option>');
-                    $('#room_availability').text('No available rooms').removeClass('text-success').addClass('text-danger');
+            $.ajax({
+                url: '<?php echo base_url ?>admin/inc/get_available_rooms.php',
+                method: 'GET',
+                data: {
+                    campus: campus,
+                    date: date,
+                    time_slot: timeSlot
+                },
+                dataType: 'json',
+                timeout: 10000,
+                success: function(data) {
+                    if (data && data.success && data.rooms && data.rooms.length > 0) {
+                        var html = '<option value="">Select Room</option>';
+                        data.rooms.forEach(function(room) {
+                            html += '<option value="' + (room.room_number || '') + '">' + (room.room_number || '') + ' (Available: ' + (room.available_slots || 0) + '/' + (room.capacity || 0) + ')</option>';
+                        });
+                        $('#roomNumber').html(html);
+                        $('#room_availability').text(data.rooms.length + ' room(s) available').removeClass('text-danger').addClass('text-success');
+                    } else {
+                        $('#roomNumber').html('<option value="">No rooms available</option>');
+                        $('#room_availability').text('No available rooms').removeClass('text-success').addClass('text-danger');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Room loading error:', status, error);
+                    $('#roomNumber').html('<option value="">Error loading rooms</option>');
+                    $('#room_availability').text('Error loading rooms').removeClass('text-success').addClass('text-danger');
                 }
-            }, 'json').fail(function() {
-                $('#roomNumber').html('<option value="">Error loading rooms</option>');
-                $('#room_availability').text('Error loading rooms').removeClass('text-success').addClass('text-danger');
             });
         }
     }
