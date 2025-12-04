@@ -31,22 +31,57 @@ class DatabaseWrapper {
         
         try {
             if ($type === 'pgsql') {
-                // For Supabase on cloud, prefer connection pooler (port 6543)
-                // It handles IPv4/IPv6 better and is optimized for serverless
+                // For Supabase on cloud, force IPv4 resolution to avoid IPv6 issues
                 $isCloud = getenv('RENDER') || getenv('DB_HOST');
                 
-                // Try IPv4 resolution first to avoid IPv6 issues
+                // Force IPv4 resolution - multiple methods for reliability
                 $ipv4 = $this->resolveIPv4($host);
+                
+                if (!$ipv4 && $isCloud) {
+                    // If DNS resolution fails, try alternative method
+                    $ipv4 = $this->resolveIPv4Alternative($host);
+                }
+                
+                // Use IPv4 if available, otherwise use hostname (will try IPv4 first)
                 $connectHost = $ipv4 ? $ipv4 : $host;
                 
+                // Build DSN - always use IPv4 if available
                 $dsn = "pgsql:host={$connectHost};port={$port};dbname={$db}";
                 
-                $this->pdo = new PDO($dsn, $user, $pass, [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_TIMEOUT => 10,
-                    PDO::ATTR_PERSISTENT => false
-                ]);
+                // Connection attempts with fallback
+                $lastError = null;
+                $connected = false;
+                
+                // Build list of hosts to try
+                $attempts = [];
+                if ($ipv4) {
+                    $attempts[] = $ipv4; // Try IPv4 first
+                }
+                $attempts[] = $host; // Always try hostname as fallback
+                
+                foreach ($attempts as $attemptHost) {
+                    try {
+                        $dsn = "pgsql:host={$attemptHost};port={$port};dbname={$db}";
+                        $this->pdo = new PDO($dsn, $user, $pass, [
+                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                            PDO::ATTR_TIMEOUT => 10,
+                            PDO::ATTR_PERSISTENT => false
+                        ]);
+                        // Success - break out of loop
+                        $connected = true;
+                        break;
+                    } catch (PDOException $e) {
+                        $lastError = $e;
+                        // Continue to next attempt
+                        continue;
+                    }
+                }
+                
+                // If all attempts failed, throw the last error
+                if (!$connected && $lastError) {
+                    throw $lastError;
+                }
             } else {
                 $dsn = "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4";
                 $this->pdo = new PDO($dsn, $user, $pass, [
@@ -62,12 +97,37 @@ class DatabaseWrapper {
     
     /**
      * Resolve hostname to IPv4 address to avoid IPv6 connection issues
+     * Uses multiple methods for reliability
      */
     private function resolveIPv4($host) {
-        // Try to get IPv4 address (DNS_A record)
+        // Method 1: Use gethostbyname (IPv4 only, most reliable)
+        $ip = @gethostbyname($host);
+        if ($ip && $ip !== $host && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return $ip;
+        }
+        
+        // Method 2: Use dns_get_record with DNS_A (IPv4 only)
         $records = @dns_get_record($host, DNS_A);
-        if ($records && isset($records[0]['ip'])) {
+        if ($records && isset($records[0]['ip']) && filter_var($records[0]['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return $records[0]['ip'];
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Alternative IPv4 resolution method
+     */
+    private function resolveIPv4Alternative($host) {
+        // Try using getaddrinfo equivalent via shell command (if available)
+        if (function_exists('shell_exec')) {
+            $output = @shell_exec("getent hosts {$host} 2>/dev/null | awk '{print $1}' | grep -E '^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$' | head -1");
+            if ($output) {
+                $ip = trim($output);
+                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                    return $ip;
+                }
+            }
         }
         return false;
     }

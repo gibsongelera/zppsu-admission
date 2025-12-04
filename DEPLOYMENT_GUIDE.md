@@ -76,9 +76,18 @@
 - **Use Connection Pooler (Port 6543)**: Make sure `DB_PORT` is set to `6543`, not `5432`
   - The connection pooler avoids IPv6 issues and works better on cloud platforms
   - Direct connection (5432) may fail with IPv6 addresses
-- Verify `DB_PASS` is correct
-- Check if Supabase allows external connections
+- **Check Supabase Firewall Settings**:
+  1. Go to Supabase Dashboard → Project Settings → Database
+  2. Scroll to "Connection Pooling" section
+  3. Make sure "Connection Pooler" is enabled
+  4. Check "Network Restrictions" - ensure it allows connections from all IPs (0.0.0.0/0) or add Render's IP ranges
+  5. If using IPv6, you may need to enable IPv6 support in Supabase settings
+- **Verify `DB_PASS` is correct**
 - The code automatically resolves hostname to IPv4 when possible
+- **If IPv6 errors persist**:
+  - Try using port `5432` (direct connection) instead of `6543` (pooler)
+  - Check Supabase project settings for IPv6/IPv4 preferences
+  - Contact Supabase support if Render's network can't reach Supabase
 - Try connecting via psql from your computer first:
   ```
   # Test connection pooler (recommended)
