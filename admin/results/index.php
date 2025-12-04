@@ -2,9 +2,14 @@
 require_once __DIR__ . '/../inc/db_connect.php';
 require_once __DIR__ . '/../inc/db_handler.php';
 
-// Ensure connection is available
+// Ensure connection is available and valid
 if (!isset($conn) || $conn === null) {
     die('Database connection failed. Please check your configuration.');
+}
+
+// Check if connection is actually established
+if (!$conn->isConnected()) {
+    die('Database connection is not established. Please check your database settings.');
 }
 
 $db = new DatabaseHandler($conn);

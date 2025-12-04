@@ -28,6 +28,7 @@ class DatabaseWrapper {
     
     public function __construct($host, $user, $pass, $db, $port = '3306', $type = 'mysql') {
         $this->dbType = $type;
+        $this->pdo = null; // Initialize to null
         
         try {
             if ($type === 'pgsql') {
@@ -110,7 +111,13 @@ class DatabaseWrapper {
                 
                 // If all attempts failed, throw the last error
                 if (!$connected && $lastError) {
+                    $this->pdo = null;
                     throw $lastError;
+                }
+                
+                // Final validation - ensure PDO was created
+                if ($this->pdo === null) {
+                    throw new Exception('Failed to establish database connection after all attempts');
                 }
             } else {
                 $dsn = "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4";
@@ -118,10 +125,22 @@ class DatabaseWrapper {
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
                 ]);
+                
+                // Validate MySQL connection
+                if ($this->pdo === null) {
+                    throw new Exception('Failed to establish MySQL database connection');
+                }
             }
         } catch (PDOException $e) {
+            $this->pdo = null;
             $this->connect_error = $e->getMessage();
+            error_log("Database connection PDOException: " . $e->getMessage());
             throw new Exception('Connection failed: ' . $e->getMessage());
+        } catch (Exception $e) {
+            $this->pdo = null;
+            $this->connect_error = $e->getMessage();
+            error_log("Database connection Exception: " . $e->getMessage());
+            throw $e;
         }
     }
     
@@ -167,6 +186,13 @@ class DatabaseWrapper {
      */
     public function query($sql) {
         try {
+            // Check if PDO connection exists
+            if ($this->pdo === null) {
+                error_log("Query error: PDO connection is null. SQL: " . $sql);
+                $this->error = "Database connection is not established";
+                return new DatabaseResult(null, $this->dbType);
+            }
+            
             // Convert MySQL-specific syntax to PostgreSQL if needed
             if ($this->dbType === 'pgsql') {
                 $sql = $this->convertToPostgres($sql);
@@ -178,6 +204,10 @@ class DatabaseWrapper {
             $this->error = $e->getMessage();
             error_log("Query error: " . $e->getMessage() . " | SQL: " . $sql);
             // Return empty result object instead of false to prevent "num_rows on bool" errors
+            return new DatabaseResult(null, $this->dbType);
+        } catch (Exception $e) {
+            $this->error = $e->getMessage();
+            error_log("Query error: " . $e->getMessage() . " | SQL: " . $sql);
             return new DatabaseResult(null, $this->dbType);
         }
     }
@@ -288,6 +318,13 @@ class DatabaseWrapper {
     public function close() {
         $this->pdo = null;
     }
+    
+    /**
+     * Check if connection is valid
+     */
+    public function isConnected() {
+        return $this->pdo !== null;
+    }
 }
 
 /**
@@ -394,9 +431,27 @@ try {
     $port = DB_PORT;
     $type = DB_TYPE;
 
+    // Log connection attempt (without password)
+    error_log("Attempting database connection: host=$host, port=$port, db=$db, type=$type, user=$user");
+    
     $conn = new DatabaseWrapper($host, $user, $pass, $db, $port, $type);
     
+    // Validate connection was established
+    if ($conn->pdo === null) {
+        error_log("Connection created but PDO is null");
+        throw new Exception('PDO connection is null after initialization. Check database credentials and network connectivity.');
+    }
+    
+    error_log("Database connection established successfully");
+    
 } catch (Exception $e) {
-    die('Database connection error: ' . $e->getMessage());
+    $errorMsg = $e->getMessage();
+    error_log('Database connection error: ' . $errorMsg);
+    error_log('Connection details: host=' . (defined('DB_SERVER') ? DB_SERVER : 'undefined') . 
+              ', port=' . (defined('DB_PORT') ? DB_PORT : 'undefined') . 
+              ', db=' . (defined('DB_NAME') ? DB_NAME : 'undefined') . 
+              ', type=' . (defined('DB_TYPE') ? DB_TYPE : 'undefined'));
+    die('Database connection error: ' . htmlspecialchars($errorMsg) . 
+        '<br><small>Please check your database configuration in Render environment variables.</small>');
 }
 ?>
