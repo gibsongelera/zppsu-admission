@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     avatar TEXT,
-    type SMALLINT DEFAULT 3, -- 1=Admin, 2=Staff, 3=Student
+    type SMALLINT DEFAULT 3,
     date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_updated TIMESTAMP,
     last_login TIMESTAMP
@@ -53,7 +53,6 @@ CREATE TABLE IF NOT EXISTS schedule_admission (
     status VARCHAR(20) DEFAULT 'Pending',
     date_log TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     application_type VARCHAR(50) DEFAULT 'New Student',
-    -- New columns for enhanced features
     time_slot VARCHAR(50),
     room_number VARCHAR(50),
     exam_result VARCHAR(20) DEFAULT 'Pending',
@@ -64,14 +63,78 @@ CREATE TABLE IF NOT EXISTS schedule_admission (
     last_sms_sent TIMESTAMP,
     reminder_sent SMALLINT DEFAULT 0,
     qr_code_path VARCHAR(255),
-    qr_token VARCHAR(100) UNIQUE,
+    qr_token VARCHAR(100),
     reschedule_count INT DEFAULT 0
 );
+
+-- Add columns if table already exists (safe to run multiple times)
+DO $$ 
+BEGIN
+    -- Add time_slot if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='time_slot') THEN
+        ALTER TABLE schedule_admission ADD COLUMN time_slot VARCHAR(50);
+    END IF;
+    
+    -- Add room_number if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='room_number') THEN
+        ALTER TABLE schedule_admission ADD COLUMN room_number VARCHAR(50);
+    END IF;
+    
+    -- Add exam_result if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='exam_result') THEN
+        ALTER TABLE schedule_admission ADD COLUMN exam_result VARCHAR(20) DEFAULT 'Pending';
+    END IF;
+    
+    -- Add exam_remarks if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='exam_remarks') THEN
+        ALTER TABLE schedule_admission ADD COLUMN exam_remarks TEXT;
+    END IF;
+    
+    -- Add exam_score if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='exam_score') THEN
+        ALTER TABLE schedule_admission ADD COLUMN exam_score DECIMAL(5,2);
+    END IF;
+    
+    -- Add admission_slip_generated if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='admission_slip_generated') THEN
+        ALTER TABLE schedule_admission ADD COLUMN admission_slip_generated SMALLINT DEFAULT 0;
+    END IF;
+    
+    -- Add admission_slip_path if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='admission_slip_path') THEN
+        ALTER TABLE schedule_admission ADD COLUMN admission_slip_path VARCHAR(255);
+    END IF;
+    
+    -- Add last_sms_sent if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='last_sms_sent') THEN
+        ALTER TABLE schedule_admission ADD COLUMN last_sms_sent TIMESTAMP;
+    END IF;
+    
+    -- Add reminder_sent if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='reminder_sent') THEN
+        ALTER TABLE schedule_admission ADD COLUMN reminder_sent SMALLINT DEFAULT 0;
+    END IF;
+    
+    -- Add qr_code_path if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='qr_code_path') THEN
+        ALTER TABLE schedule_admission ADD COLUMN qr_code_path VARCHAR(255);
+    END IF;
+    
+    -- Add qr_token if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='qr_token') THEN
+        ALTER TABLE schedule_admission ADD COLUMN qr_token VARCHAR(100);
+    END IF;
+    
+    -- Add reschedule_count if not exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='reschedule_count') THEN
+        ALTER TABLE schedule_admission ADD COLUMN reschedule_count INT DEFAULT 0;
+    END IF;
+END $$;
 
 -- Document uploads table
 CREATE TABLE IF NOT EXISTS document_uploads (
     id SERIAL PRIMARY KEY,
-    schedule_id INT NOT NULL REFERENCES schedule_admission(id) ON DELETE CASCADE,
+    schedule_id INT NOT NULL,
     document_type VARCHAR(50) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     file_path VARCHAR(500) NOT NULL,
@@ -85,8 +148,7 @@ CREATE TABLE IF NOT EXISTS room_assignments (
     campus VARCHAR(100) NOT NULL,
     capacity INT DEFAULT 30,
     is_active SMALLINT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(room_number, campus)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- SMS log table
@@ -101,7 +163,7 @@ CREATE TABLE IF NOT EXISTS sms_log (
 -- Reschedule history table
 CREATE TABLE IF NOT EXISTS reschedule_history (
     id SERIAL PRIMARY KEY,
-    schedule_id INT NOT NULL REFERENCES schedule_admission(id) ON DELETE CASCADE,
+    schedule_id INT NOT NULL,
     old_date DATE,
     new_date DATE,
     old_time_slot VARCHAR(50),
@@ -135,12 +197,36 @@ CREATE TABLE IF NOT EXISTS otp_verification (
     verified SMALLINT DEFAULT 0
 );
 
--- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_schedule_status ON schedule_admission(status);
-CREATE INDEX IF NOT EXISTS idx_schedule_date ON schedule_admission(date_scheduled);
-CREATE INDEX IF NOT EXISTS idx_schedule_campus ON schedule_admission(school_campus);
-CREATE INDEX IF NOT EXISTS idx_sms_classification ON sms_log(classification, phone);
-CREATE INDEX IF NOT EXISTS idx_qr_token ON schedule_admission(qr_token);
+-- Create indexes (only if column exists)
+DO $$
+BEGIN
+    -- Index on status
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_schedule_status') THEN
+        CREATE INDEX idx_schedule_status ON schedule_admission(status);
+    END IF;
+    
+    -- Index on date_scheduled
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_schedule_date') THEN
+        CREATE INDEX idx_schedule_date ON schedule_admission(date_scheduled);
+    END IF;
+    
+    -- Index on school_campus
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_schedule_campus') THEN
+        CREATE INDEX idx_schedule_campus ON schedule_admission(school_campus);
+    END IF;
+    
+    -- Index on sms_log
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_sms_classification') THEN
+        CREATE INDEX idx_sms_classification ON sms_log(classification, phone);
+    END IF;
+    
+    -- Index on qr_token (only if column exists)
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='qr_token') THEN
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_qr_token') THEN
+            CREATE INDEX idx_qr_token ON schedule_admission(qr_token);
+        END IF;
+    END IF;
+END $$;
 
 -- Insert default admin user (password: admin123)
 INSERT INTO users (firstname, lastname, username, password, type) 
@@ -152,16 +238,23 @@ INSERT INTO system_settings (id, name, short_name)
 VALUES (1, 'ZPPSU Admission System', 'ZPPSU')
 ON CONFLICT (id) DO NOTHING;
 
--- Insert sample room assignments
-INSERT INTO room_assignments (room_number, campus, capacity) VALUES
-('Room 101', 'ZPPSU MAIN', 30),
-('Room 102', 'ZPPSU MAIN', 30),
-('Room 103', 'ZPPSU MAIN', 25),
-('Room 201', 'ZPPSU MAIN', 40),
-('Room 101', 'ZPPSU CAMPUS 2', 30)
-ON CONFLICT DO NOTHING;
+-- Insert sample room assignments (handle duplicates gracefully)
+DO $$
+BEGIN
+    INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 101', 'ZPPSU MAIN', 30)
+    ON CONFLICT DO NOTHING;
+    INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 102', 'ZPPSU MAIN', 30)
+    ON CONFLICT DO NOTHING;
+    INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 103', 'ZPPSU MAIN', 25)
+    ON CONFLICT DO NOTHING;
+    INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 201', 'ZPPSU MAIN', 40)
+    ON CONFLICT DO NOTHING;
+    INSERT INTO room_assignments (room_number, campus, capacity) VALUES ('Room 101', 'ZPPSU CAMPUS 2', 30)
+    ON CONFLICT DO NOTHING;
+EXCEPTION WHEN OTHERS THEN
+    -- Ignore errors from duplicate inserts
+    NULL;
+END $$;
 
--- Grant permissions (adjust as needed)
--- ALTER TABLE users ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE schedule_admission ENABLE ROW LEVEL SECURITY;
-
+-- Success message
+SELECT 'Schema created/updated successfully!' as result;
