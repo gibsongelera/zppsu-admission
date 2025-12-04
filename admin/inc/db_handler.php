@@ -283,37 +283,21 @@ class DatabaseHandler {
             // Handle both 'role' and 'type' columns, and both string and integer values
             $roleStr = (string)$role;
             if ($startDate && $endDate) {
-                // Try with CAST first (PostgreSQL), fallback to simple comparison
-                $sql = "SELECT COUNT(*) AS cnt FROM users WHERE (CAST(role AS INTEGER) = ? OR CAST(type AS INTEGER) = ? OR role = ? OR type = ?) AND DATE(date_added) BETWEEN ? AND ?";
+                $sql = "SELECT COUNT(*) AS cnt FROM users WHERE (role = ? OR type = ? OR role = ? OR type = ?) AND DATE(date_added) BETWEEN ? AND ?";
                 $stmt = $this->conn->prepare($sql);
                 if (!$stmt) {
-                    // Fallback to simpler query
-                    $sql = "SELECT COUNT(*) AS cnt FROM users WHERE (role = ? OR type = ?) AND DATE(date_added) BETWEEN ? AND ?";
-                    $stmt = $this->conn->prepare($sql);
-                    if (!$stmt) {
-                        error_log("Prepare failed in getUsersCountByRole with date range");
-                        return 0;
-                    }
-                    $stmt->bind_param("iiss", $role, $role, $startDate, $endDate);
-                } else {
-                    $stmt->bind_param("iissss", $role, $role, $roleStr, $roleStr, $startDate, $endDate);
+                    error_log("Prepare failed in getUsersCountByRole with date range");
+                    return 0;
                 }
+                $stmt->bind_param("iissss", $role, $role, $roleStr, $roleStr, $startDate, $endDate);
             } else {
-                // Try with CAST first (PostgreSQL), fallback to simple comparison
-                $sql = "SELECT COUNT(*) AS cnt FROM users WHERE (CAST(role AS INTEGER) = ? OR CAST(type AS INTEGER) = ? OR role = ? OR type = ?)";
+                $sql = "SELECT COUNT(*) AS cnt FROM users WHERE (role = ? OR type = ? OR role = ? OR type = ?)";
                 $stmt = $this->conn->prepare($sql);
                 if (!$stmt) {
-                    // Fallback to simpler query
-                    $sql = "SELECT COUNT(*) AS cnt FROM users WHERE (role = ? OR type = ?)";
-                    $stmt = $this->conn->prepare($sql);
-                    if (!$stmt) {
-                        error_log("Prepare failed in getUsersCountByRole");
-                        return 0;
-                    }
-                    $stmt->bind_param("ii", $role, $role);
-                } else {
-                    $stmt->bind_param("iiss", $role, $role, $roleStr, $roleStr);
+                    error_log("Prepare failed in getUsersCountByRole");
+                    return 0;
                 }
+                $stmt->bind_param("iiss", $role, $role, $roleStr, $roleStr);
             }
             $stmt->execute();
             $result = $stmt->get_result();
@@ -323,7 +307,8 @@ class DatabaseHandler {
             error_log("Error counting users by role: " . $e->getMessage());
             // Final fallback - use direct query
             try {
-                $qry = $this->conn->query("SELECT COUNT(*) AS cnt FROM users WHERE role = $role OR type = $role");
+                $roleEscaped = $this->conn->real_escape_string($role);
+                $qry = $this->conn->query("SELECT COUNT(*) AS cnt FROM users WHERE role = $roleEscaped OR type = $roleEscaped OR role = '$roleEscaped' OR type = '$roleEscaped'");
                 if ($qry) {
                     $row = $qry->fetch_assoc();
                     return (int)($row['cnt'] ?? 0);
