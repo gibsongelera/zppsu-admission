@@ -29,18 +29,23 @@
 
    | Key | Value |
    |-----|-------|
-   | `DB_HOST` | `db.nvojdxaektltusfprjaq.supabase.co` |
+   | `DB_HOST` | `aws-1-ap-southeast-1.pooler.supabase.com` ⚠️ **Use pooler hostname** |
    | `DB_PORT` | `6543` ⚠️ **Use connection pooler port** |
    | `DB_NAME` | `postgres` |
-   | `DB_USER` | `postgres` |
+   | `DB_USER` | `postgres.nvojdxaektltusfprjaq` ⚠️ **Pooler username format** |
    | `DB_PASS` | `[Your Supabase Database Password]` |
    | `DB_TYPE` | `pgsql` |
    | `RENDER` | `true` |
 
-   **Important:** Use port `6543` (connection pooler) instead of `5432` (direct connection). The pooler:
-   - Avoids IPv6 connection issues
-   - Is optimized for serverless/cloud deployments
-   - Provides better connection management
+   **Important:** 
+   - Use the **connection pooler hostname** (`aws-1-ap-southeast-1.pooler.supabase.com`) instead of direct hostname
+   - Use port `6543` (connection pooler) instead of `5432` (direct connection)
+   - Use pooler username format: `postgres.nvojdxaektltusfprjaq` (includes project reference)
+   - The pooler:
+     - Avoids IPv6 connection issues
+     - Is optimized for serverless/cloud deployments
+     - Provides better connection management
+     - Uses transaction pooling mode
 
 3. **Save Changes**
    - Click "Save Changes" after adding all variables
@@ -90,10 +95,10 @@
   - Contact Supabase support if Render's network can't reach Supabase
 - Try connecting via psql from your computer first:
   ```
-  # Test connection pooler (recommended)
-  psql -h db.nvojdxaektltusfprjaq.supabase.co -p 6543 -d postgres -U postgres
+  # Test connection pooler (recommended - use this!)
+  psql -h aws-1-ap-southeast-1.pooler.supabase.com -p 6543 -d postgres -U postgres.nvojdxaektltusfprjaq
   
-  # Or test direct connection
+  # Or test direct connection (fallback)
   psql -h db.nvojdxaektltusfprjaq.supabase.co -p 5432 -d postgres -U postgres
   ```
 
@@ -104,6 +109,16 @@
 
 ## Your Supabase Connection Details
 
+**Connection Pooler (Recommended for Render):**
+```
+Host: aws-1-ap-southeast-1.pooler.supabase.com
+Port: 6543
+Database: postgres
+User: postgres.nvojdxaektltusfprjaq
+Password: [Set in Supabase Dashboard]
+```
+
+**Direct Connection (Fallback):**
 ```
 Host: db.nvojdxaektltusfprjaq.supabase.co
 Port: 5432
