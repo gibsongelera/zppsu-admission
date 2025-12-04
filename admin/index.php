@@ -13,8 +13,12 @@
       <?php endif;?>    
      <?php 
         // Role-based routing system
-        $role = isset($_SESSION['userdata']['role']) ? (int)$_SESSION['userdata']['role'] : null;
-        $page = isset($_GET['page']) ? $_GET['page'] : 'admin';
+        // Handle both 'role' and 'type' columns, and 'login_type' for compatibility
+        $role = isset($_SESSION['userdata']['role']) ? (int)$_SESSION['userdata']['role'] : 
+                (isset($_SESSION['userdata']['type']) ? (int)$_SESSION['userdata']['type'] : 
+                (isset($_SESSION['userdata']['login_type']) ? (int)$_SESSION['userdata']['login_type'] : null));
+        
+        $page = isset($_GET['page']) ? $_GET['page'] : null;
         
         // Define role-based page mappings
         $rolePages = [
@@ -25,6 +29,11 @@
         
         // Get the role directory
         $roleDir = $rolePages[$role] ?? 'admin';
+        
+        // Set default page based on role if no page specified
+        if ($page === null || $page === '') {
+            $page = $roleDir . '/index';
+        }
         
         // Check if user is trying to access a different role's pages
         $requestedRole = null;
@@ -42,18 +51,23 @@
         
         // For students, restrict access to only student pages
         if ($role === 3) {
-            $studentAllowed = array('student/index','schedule', 'sms_log', 'user/manage_user');
-            if (!in_array($page, $studentAllowed)) {
+            $studentAllowed = array('student/index','student', 'schedule', 'sms_log', 'user/manage_user');
+            if (!in_array($page, $studentAllowed) && strpos($page, 'student/') !== 0) {
                 $page = 'student/index';
             }
         }
         
         // For staff, restrict access to staff and admin pages
         if ($role === 2) {
-            $staffAllowed = array('staff/index','home', 'teacher_log', 'sms_log', 'results', 'qr_scanner', 'bulk_reschedule', 'admin/user/list', 'admin/user/manage_user', 'staff/manage_user');
-            if (!in_array($page, $staffAllowed)) {
+            $staffAllowed = array('staff/index','staff', 'home', 'teacher_log', 'sms_log', 'results', 'qr_scanner', 'bulk_reschedule', 'admin/user/list', 'admin/user/manage_user', 'staff/manage_user');
+            if (!in_array($page, $staffAllowed) && strpos($page, 'staff/') !== 0 && strpos($page, 'admin/') !== 0) {
                 $page = 'staff/index';
             }
+        }
+        
+        // For admin, default to admin dashboard if no page specified
+        if ($role === 1 && ($page === null || $page === '')) {
+            $page = 'admin/index';
         }
      ?>
       <!-- Content Wrapper. Contains page content -->

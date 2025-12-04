@@ -294,6 +294,12 @@ class DatabaseWrapper {
         // CURDATE() -> CURRENT_DATE
         $sql = str_ireplace('CURDATE()', 'CURRENT_DATE', $sql);
         
+        // MONTH(date) -> EXTRACT(MONTH FROM date)::INTEGER
+        $sql = preg_replace('/MONTH\s*\(\s*([^)]+)\s*\)/i', 'EXTRACT(MONTH FROM $1)::INTEGER', $sql);
+        
+        // YEAR(date) -> EXTRACT(YEAR FROM date)::INTEGER
+        $sql = preg_replace('/YEAR\s*\(\s*([^)]+)\s*\)/i', 'EXTRACT(YEAR FROM $1)::INTEGER', $sql);
+        
         // NOW() is the same in both
         // DATE() function - PostgreSQL supports DATE() but may need casting
         // md5() is the same in both

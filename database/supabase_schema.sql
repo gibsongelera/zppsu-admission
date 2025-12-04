@@ -63,12 +63,16 @@ CREATE TABLE IF NOT EXISTS system_settings (
 CREATE TABLE IF NOT EXISTS schedule_admission (
     id SERIAL PRIMARY KEY,
     reference_number VARCHAR(50) UNIQUE,
-    first_name VARCHAR(100) NOT NULL,
+    first_name VARCHAR(100),
     middle_name VARCHAR(100),
-    last_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100),
+    -- Legacy column names for compatibility
+    surname VARCHAR(100),
+    given_name VARCHAR(100),
     gender VARCHAR(10),
     age INT,
     phone_number VARCHAR(20),
+    phone VARCHAR(20), -- Alternative column name
     date_of_birth DATE,
     address TEXT,
     email VARCHAR(255),
@@ -79,6 +83,7 @@ CREATE TABLE IF NOT EXISTS schedule_admission (
     previous_school VARCHAR(255),
     date_scheduled DATE,
     document TEXT,
+    photo VARCHAR(255), -- Photo filename
     status VARCHAR(20) DEFAULT 'Pending',
     date_log TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     application_type VARCHAR(50) DEFAULT 'New Student',
@@ -158,6 +163,48 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='reschedule_count') THEN
         ALTER TABLE schedule_admission ADD COLUMN reschedule_count INT DEFAULT 0;
     END IF;
+    
+    -- Add legacy column names for compatibility (surname, given_name)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='surname') THEN
+        ALTER TABLE schedule_admission ADD COLUMN surname VARCHAR(100);
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='given_name') THEN
+        ALTER TABLE schedule_admission ADD COLUMN given_name VARCHAR(100);
+    END IF;
+    
+    -- Add phone column (alternative to phone_number)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='phone') THEN
+        ALTER TABLE schedule_admission ADD COLUMN phone VARCHAR(20);
+    END IF;
+    
+    -- Add photo column
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='schedule_admission' AND column_name='photo') THEN
+        ALTER TABLE schedule_admission ADD COLUMN photo VARCHAR(255);
+    END IF;
+    
+    -- Sync data: if first_name/last_name exist but surname/given_name don't, copy them
+    UPDATE schedule_admission 
+    SET surname = COALESCE(surname, last_name),
+        given_name = COALESCE(given_name, first_name)
+    WHERE (surname IS NULL OR given_name IS NULL) 
+      AND (first_name IS NOT NULL OR last_name IS NOT NULL);
+    
+    -- Sync the other way: if surname/given_name exist but first_name/last_name don't, copy them
+    UPDATE schedule_admission 
+    SET first_name = COALESCE(first_name, given_name),
+        last_name = COALESCE(last_name, surname)
+    WHERE (first_name IS NULL OR last_name IS NULL) 
+      AND (surname IS NOT NULL OR given_name IS NOT NULL);
+    
+    -- Sync phone columns
+    UPDATE schedule_admission 
+    SET phone = COALESCE(phone, phone_number)
+    WHERE phone IS NULL AND phone_number IS NOT NULL;
+    
+    UPDATE schedule_admission 
+    SET phone_number = COALESCE(phone_number, phone)
+    WHERE phone_number IS NULL AND phone IS NOT NULL;
 END $$;
 
 -- Document uploads table

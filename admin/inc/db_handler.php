@@ -3,6 +3,8 @@ class DatabaseHandler {
     public $conn;
     public $lastAffectedRows = null;
 
+    private $dbType = 'mysql';
+    
     /**
      * Initialize database handler
      */
@@ -14,6 +16,12 @@ class DatabaseHandler {
         $this->conn = $connection;
         if (method_exists($this->conn, 'set_charset')) {
             $this->conn->set_charset("utf8mb4");
+        }
+        // Get database type from connection if available
+        if (property_exists($this->conn, 'dbType')) {
+            $this->dbType = $this->conn->dbType;
+        } elseif (defined('DB_TYPE')) {
+            $this->dbType = DB_TYPE;
         }
     }
 
@@ -115,9 +123,14 @@ class DatabaseHandler {
     public function getRecordById($id) {
         try {
             $stmt = $this->conn->prepare("SELECT * FROM schedule_admission WHERE id = ?");
+            if (!$stmt) {
+                error_log("Prepare failed in getRecordById");
+                return false;
+            }
             $stmt->bind_param("i", $id);
             $stmt->execute();
-            return $stmt->get_result()->fetch_assoc();
+            $result = $stmt->get_result();
+            return $result ? $result->fetch_assoc() : false;
         } catch (Exception $e) {
             error_log("Error fetching record: " . $e->getMessage());
             return false;
@@ -131,11 +144,17 @@ class DatabaseHandler {
         try {
             if ($status !== null) {
                 $stmt = $this->conn->prepare("SELECT COUNT(*) AS cnt FROM schedule_admission WHERE status = ?");
+                if (!$stmt) {
+                    error_log("Prepare failed in getScheduleCount with status");
+                    return 0;
+                }
                 $stmt->bind_param("s", $status);
                 $stmt->execute();
-                $res = $stmt->get_result()->fetch_assoc();
+                $result = $stmt->get_result();
+                $res = $result ? $result->fetch_assoc() : ['cnt' => 0];
             } else {
-                $res = $this->conn->query("SELECT COUNT(*) AS cnt FROM schedule_admission")->fetch_assoc();
+                $qry = $this->conn->query("SELECT COUNT(*) AS cnt FROM schedule_admission");
+                $res = $qry ? $qry->fetch_assoc() : ['cnt' => 0];
             }
             return (int)($res['cnt'] ?? 0);
         } catch (Exception $e) {
@@ -149,11 +168,20 @@ class DatabaseHandler {
      */
     public function getScheduleCountInRange($startDate, $endDate, $status = null) {
         try {
+            // Use date_log instead of created_at for compatibility (works with both MySQL and PostgreSQL)
             if ($status !== null) {
-                $stmt = $this->conn->prepare("SELECT COUNT(*) AS cnt FROM schedule_admission WHERE DATE(created_at) BETWEEN ? AND ? AND status = ?");
+                $stmt = $this->conn->prepare("SELECT COUNT(*) AS cnt FROM schedule_admission WHERE DATE(date_log) BETWEEN ? AND ? AND status = ?");
+                if (!$stmt) {
+                    error_log("Prepare failed in getScheduleCountInRange with status");
+                    return 0;
+                }
                 $stmt->bind_param("sss", $startDate, $endDate, $status);
             } else {
-                $stmt = $this->conn->prepare("SELECT COUNT(*) AS cnt FROM schedule_admission WHERE DATE(created_at) BETWEEN ? AND ?");
+                $stmt = $this->conn->prepare("SELECT COUNT(*) AS cnt FROM schedule_admission WHERE DATE(date_log) BETWEEN ? AND ?");
+                if (!$stmt) {
+                    error_log("Prepare failed in getScheduleCountInRange without status");
+                    return 0;
+                }
                 $stmt->bind_param("ss", $startDate, $endDate);
             }
             $stmt->execute();
@@ -171,10 +199,22 @@ class DatabaseHandler {
     public function getMonthlyScheduleCounts($year) {
         $counts = array_fill(1, 12, 0);
         try {
-            $stmt = $this->conn->prepare("SELECT MONTH(created_at) AS m, COUNT(*) AS cnt FROM schedule_admission WHERE YEAR(created_at)=? GROUP BY m");
+            // Use date_log - the convertToPostgres will handle MySQL->PostgreSQL conversion
+            // Use MySQL syntax, it will be converted automatically if needed
+            $sql = "SELECT MONTH(date_log) AS m, COUNT(*) AS cnt FROM schedule_admission WHERE YEAR(date_log)=? GROUP BY m";
+            
+            $stmt = $this->conn->prepare($sql);
+            if (!$stmt) {
+                error_log("Prepare failed in getMonthlyScheduleCounts");
+                return $counts;
+            }
             $stmt->bind_param("i", $year);
             $stmt->execute();
-            $res = $stmt->get_result();
+            $result = $stmt->get_result();
+            if (!$result) {
+                return $counts;
+            }
+            $res = $result;
             while ($row = $res->fetch_assoc()) {
                 $m = (int)$row['m'];
                 $counts[$m] = (int)$row['cnt'];
@@ -215,15 +255,25 @@ class DatabaseHandler {
      */
     public function getUsersCountByRole($role, $startDate = null, $endDate = null) {
         try {
+            // Handle both 'role' and 'type' columns
             if ($startDate && $endDate) {
-                $stmt = $this->conn->prepare("SELECT COUNT(*) AS cnt FROM users WHERE role = ? AND DATE(date_added) BETWEEN ? AND ?");
-                $stmt->bind_param("iss", $role, $startDate, $endDate);
+                $stmt = $this->conn->prepare("SELECT COUNT(*) AS cnt FROM users WHERE (role = ? OR type = ?) AND DATE(date_added) BETWEEN ? AND ?");
+                if (!$stmt) {
+                    error_log("Prepare failed in getUsersCountByRole with date range");
+                    return 0;
+                }
+                $stmt->bind_param("iiss", $role, $role, $startDate, $endDate);
             } else {
-                $stmt = $this->conn->prepare("SELECT COUNT(*) AS cnt FROM users WHERE role = ?");
-                $stmt->bind_param("i", $role);
+                $stmt = $this->conn->prepare("SELECT COUNT(*) AS cnt FROM users WHERE (role = ? OR type = ?)");
+                if (!$stmt) {
+                    error_log("Prepare failed in getUsersCountByRole");
+                    return 0;
+                }
+                $stmt->bind_param("ii", $role, $role);
             }
             $stmt->execute();
-            $res = $stmt->get_result()->fetch_assoc();
+            $result = $stmt->get_result();
+            $res = $result ? $result->fetch_assoc() : ['cnt' => 0];
             return (int)($res['cnt'] ?? 0);
         } catch (Exception $e) {
             error_log("Error counting users by role: " . $e->getMessage());
@@ -242,20 +292,31 @@ class DatabaseHandler {
             $lastName = trim((string)$lastName);
             $middleName = trim((string)$middleName);
 
+            // Handle both column name conventions:
+            // Old: surname, given_name, middle_name
+            // New: first_name, last_name, middle_name
+            // Also handle both phone_number and phone columns
+            // Use COALESCE to check both column name sets
             $sql = "SELECT * FROM schedule_admission 
                     WHERE (
                         (email = ? AND email <> '')
-                        OR (phone = ? AND phone <> '')
-                        OR (surname = ? AND given_name = ? AND (middle_name = ? OR ? = ''))
+                        OR (COALESCE(phone_number, phone) = ? AND COALESCE(phone_number, phone) <> '')
+                        OR (COALESCE(last_name, surname) = ? AND COALESCE(first_name, given_name) = ? AND (middle_name = ? OR ? = ''))
                     )
-                    ORDER BY created_at DESC";
+                    ORDER BY date_log DESC, id DESC";
             $stmt = $this->conn->prepare($sql);
+            if (!$stmt) {
+                error_log("Prepare failed in getStudentRecords");
+                return new DatabaseResult(null, $this->dbType);
+            }
+            // Bind parameters: email, phone, last_name/surname, first_name/given_name, middle_name (x2)
             $stmt->bind_param("ssssss", $email, $phone, $lastName, $firstName, $middleName, $middleName);
             $stmt->execute();
-            return $stmt->get_result();
+            $result = $stmt->get_result();
+            return $result ? $result : new DatabaseResult(null, $this->dbType);
         } catch (Exception $e) {
             error_log("Error fetching student records: " . $e->getMessage());
-            return false;
+            return new DatabaseResult(null, $this->dbType);
         }
     }
     
