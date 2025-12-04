@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: zppsu-admission
+    env: php
+    plan: free
+    region: oregon
+
+    # Root of your PHP app
+    rootDir: .
+
+    # No special build step (you are not using Composer yet)
+    buildCommand: ""
+
+    # Start a PHP built-in server on the port Render provides
+    startCommand: php -S 0.0.0.0:$PORT -t .
+
+    envVars:
+      # Supabase / DB settings (fill these in on Render dashboard, not here)
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_USER
+        sync: false
+      - key: DB_PASS
+        sync: false
+      - key: DB_NAME
+        sync: false
+
+

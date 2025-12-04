@@ -50,7 +50,7 @@
         
         // For staff, restrict access to staff and admin pages
         if ($role === 2) {
-            $staffAllowed = array('staff/index','home', 'teacher_log', 'sms_log', 'results', 'admin/user/list', 'admin/user/manage_user', 'staff/manage_user');
+            $staffAllowed = array('staff/index','home', 'teacher_log', 'sms_log', 'results', 'qr_scanner', 'bulk_reschedule', 'admin/user/list', 'admin/user/manage_user', 'staff/manage_user');
             if (!in_array($page, $staffAllowed)) {
                 $page = 'staff/index';
             }

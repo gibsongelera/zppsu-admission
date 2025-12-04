@@ -68,17 +68,23 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a href="<?php echo base_url ?>admin/?page=qr_scanner" class="nav-link nav-qr_scanner">
+                                        <i class="nav-icon fas fa-qrcode"></i>
+                                        <p>QR Scanner</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="<?php echo base_url ?>admin/?page=bulk_reschedule" class="nav-link nav-bulk_reschedule">
+                                        <i class="nav-icon fas fa-calendar-alt"></i>
+                                        <p>Bulk Reschedule</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="<?php echo base_url ?>admin/?page=rooms" class="nav-link nav-rooms">
                                         <i class="nav-icon fas fa-door-open"></i>
                                         <p>Room Management</p>
                                     </a>
                                 </li>
-                               <!-- <li class="nav-item">
-                                    <a href="<?php echo base_url ?>admin/?page=schedule" class="nav-link nav-schedule">
-                                        <i class="nav-icon fas fa-calendar"></i>
-                                        <p>Admission Schedule</p>
-                                    </a>
-                                </li>-->
                             <?php elseif ($role === 2): // Staff/Teacher ?>
                                 <li class="nav-item dropdown">
                                     <a href="<?php echo base_url ?>admin/?page=staff/" class="nav-link nav-staff">
@@ -102,6 +108,18 @@
                                     <a href="<?php echo base_url ?>admin/?page=results" class="nav-link nav-results">
                                         <i class="nav-icon fas fa-clipboard-check"></i>
                                         <p>Exam Results</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="<?php echo base_url ?>admin/?page=qr_scanner" class="nav-link nav-qr_scanner">
+                                        <i class="nav-icon fas fa-qrcode"></i>
+                                        <p>QR Scanner</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="<?php echo base_url ?>admin/?page=bulk_reschedule" class="nav-link nav-bulk_reschedule">
+                                        <i class="nav-icon fas fa-calendar-alt"></i>
+                                        <p>Bulk Reschedule</p>
                                     </a>
                                 </li>
                             <?php elseif ($role === 3): // Student ?>

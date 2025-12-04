@@ -27,17 +27,23 @@ $(document).ready(function(){
 		start_loader()
 		if($('.err_msg').length > 0)
 			$('.err_msg').remove()
+		$('#login-frm').find('input').removeClass('is-invalid')
 		$.ajax({
 			url:_base_url_+'classes/Login.php?f=login',
 			method:'POST',
 			data:$(this).serialize(),
-			error:err=>{
-				console.log(err)
-
+			dataType: 'json',
+			timeout: 30000,
+			error: function(xhr, status, error){
+				console.log('Login error:', status, error)
+				end_loader()
+				var _frm = $('#login-frm')
+				var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> Connection error. Please try again.</div>"
+				_frm.prepend(_msg)
 			},
 			success:function(resp){
+				end_loader()
 				if(resp){
-					resp = JSON.parse(resp)
 					if(resp.status == 'success'){
 						location.replace(_base_url_+'admin');
 					}else if(resp.status == 'incorrect'){
@@ -46,8 +52,15 @@ $(document).ready(function(){
 						_frm.prepend(_msg)
 						_frm.find('input').addClass('is-invalid')
 						$('[name="username"]').focus()
+					}else{
+						var _frm = $('#login-frm')
+						var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> " + (resp.msg || 'Login failed. Please try again.') + "</div>"
+						_frm.prepend(_msg)
 					}
-						end_loader()
+				}else{
+					var _frm = $('#login-frm')
+					var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> No response from server. Please try again.</div>"
+					_frm.prepend(_msg)
 				}
 			}
 		})
@@ -58,17 +71,23 @@ $(document).ready(function(){
 		start_loader()
 		if($('.err_msg').length > 0)
 			$('.err_msg').remove()
+		$('#flogin-frm').find('input').removeClass('is-invalid')
 		$.ajax({
 			url:_base_url_+'classes/Login.php?f=flogin',
 			method:'POST',
 			data:$(this).serialize(),
-			error:err=>{
-				console.log(err)
-
+			dataType: 'json',
+			timeout: 30000,
+			error: function(xhr, status, error){
+				console.log('Login error:', status, error)
+				end_loader()
+				var _frm = $('#flogin-frm')
+				var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> Connection error. Please try again.</div>"
+				_frm.prepend(_msg)
 			},
 			success:function(resp){
+				end_loader()
 				if(resp){
-					resp = JSON.parse(resp)
 					if(resp.status == 'success'){
 						location.replace(_base_url_+'faculty');
 					}else if(resp.status == 'incorrect'){
@@ -77,8 +96,15 @@ $(document).ready(function(){
 						_frm.prepend(_msg)
 						_frm.find('input').addClass('is-invalid')
 						$('[name="username"]').focus()
+					}else{
+						var _frm = $('#flogin-frm')
+						var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> " + (resp.msg || 'Login failed. Please try again.') + "</div>"
+						_frm.prepend(_msg)
 					}
-						end_loader()
+				}else{
+					var _frm = $('#flogin-frm')
+					var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> No response from server. Please try again.</div>"
+					_frm.prepend(_msg)
 				}
 			}
 		})
@@ -90,17 +116,23 @@ $(document).ready(function(){
 		start_loader()
 		if($('.err_msg').length > 0)
 			$('.err_msg').remove()
+		$('#slogin-frm').find('input').removeClass('is-invalid')
 		$.ajax({
 			url:_base_url_+'classes/Login.php?f=slogin',
 			method:'POST',
 			data:$(this).serialize(),
-			error:err=>{
-				console.log(err)
-
+			dataType: 'json',
+			timeout: 30000,
+			error: function(xhr, status, error){
+				console.log('Login error:', status, error)
+				end_loader()
+				var _frm = $('#slogin-frm')
+				var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> Connection error. Please try again.</div>"
+				_frm.prepend(_msg)
 			},
 			success:function(resp){
+				end_loader()
 				if(resp){
-					resp = JSON.parse(resp)
 					if(resp.status == 'success'){
 						location.replace(_base_url_+'student');
 					}else if(resp.status == 'incorrect'){
@@ -109,8 +141,15 @@ $(document).ready(function(){
 						_frm.prepend(_msg)
 						_frm.find('input').addClass('is-invalid')
 						$('[name="username"]').focus()
+					}else{
+						var _frm = $('#slogin-frm')
+						var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> " + (resp.msg || 'Login failed. Please try again.') + "</div>"
+						_frm.prepend(_msg)
 					}
-						end_loader()
+				}else{
+					var _frm = $('#slogin-frm')
+					var _msg = "<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> No response from server. Please try again.</div>"
+					_frm.prepend(_msg)
 				}
 			}
 		})

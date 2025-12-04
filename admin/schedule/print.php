@@ -1,6 +1,7 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../inc/db_connect.php';
+require_once __DIR__ . '/../inc/qr_handler.php';
 
 // Validate and get ID
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -107,6 +108,21 @@ function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 $fullName = trim($record['surname'] . ', ' . $record['given_name'] . ' ' . $record['middle_name']);
 $issuedDate = date('F d, Y');
 $logoPath = '../../uploads/zppsu1.png';
+
+// Generate QR code if approved and not yet generated
+$qrCodePath = null;
+if ($record['status'] === 'Approved') {
+    $qrHandler = new QRCodeHandler($conn);
+    if (empty($record['qr_code_path'])) {
+        // Auto-generate QR code
+        $qrResult = $qrHandler->generateQRCode($id);
+        if ($qrResult['success']) {
+            $qrCodePath = $qrResult['qr_path'];
+        }
+    } else {
+        $qrCodePath = $record['qr_code_path'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -266,7 +282,14 @@ $logoPath = '../../uploads/zppsu1.png';
                 <h4>Zamboanga Peninsula Polytechnic State University</h4>
                 <small>Official Admission Test Scheduling Slip</small>
             </div>
-            <div style="width:80px;"></div>
+            <?php if ($qrCodePath): ?>
+            <div class="qr-code text-center">
+                <img src="../../<?php echo h($qrCodePath); ?>" alt="QR Code" style="width:100px; height:100px;">
+                <small class="d-block text-muted" style="font-size:0.65rem;">Scan to verify</small>
+            </div>
+            <?php else: ?>
+            <div style="width:100px;"></div>
+            <?php endif; ?>
         </div>
 
         <div class="slip-meta">
@@ -288,7 +311,10 @@ $logoPath = '../../uploads/zppsu1.png';
         <div class="meta-row"><div class="label">Address</div><div class="value"><?php echo h($record['address']); ?></div></div>
 
         <div class="section-title">Application Details</div>
-        <div class="meta-row"><div class="label">Application Type</div><div class="value"><?php echo h($record['application_type']); ?></div></div>
+        <div class="meta-row"><div class="label">Application Type</div><div class="value"><?php 
+            $appType = $record['application_type'];
+            echo h((!$appType || $appType === '0') ? 'New Student' : $appType); 
+        ?></div></div>
         <div class="meta-row"><div class="label">Classification</div><div class="value"><?php echo h($record['classification']); ?></div></div>
         <div class="meta-row"><div class="label">Grade / Level</div><div class="value"><?php echo h($record['grade_level']); ?></div></div>
         <div class="meta-row"><div class="label">School Campus</div><div class="value"><?php echo h($record['school_campus']); ?></div></div>
